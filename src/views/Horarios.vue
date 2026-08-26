@@ -1,7 +1,7 @@
 <template>
   <AdminLayout>
     <PageBreadcrumb pageTitle="Horarios" />
-    
+
     <div class="flex gap-6 h-[calc(100vh-200px)]">
       <!-- Sidebar izquierdo: Ubicaciones -->
       <div class="w-64 flex-shrink-0 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 overflow-y-auto">
@@ -33,7 +33,17 @@
           <p>Seleccioná una ubicación para ver su horario</p>
         </div>
         <div v-else class="overflow-x-auto">
-          <h3 class="text-lg font-semibold mb-4">{{ ubicacionSeleccionada.nombre_lugar }}</h3>
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">{{ ubicacionSeleccionada?.nombre_lugar }}</h3>
+            <!-- Botón "Nuevo Horario": solo visible con ubicación seleccionada (garantizado por v-else) -->
+            <button
+              type="button"
+              @click="abrirModal()"
+              class="px-4 py-2 text-sm rounded-lg bg-brand-500 text-white hover:bg-brand-600 shrink-0"
+            >
+              + Nuevo Horario
+            </button>
+          </div>
           <table class="w-full border-collapse">
             <thead>
               <tr>
@@ -44,16 +54,27 @@
             <tbody>
               <tr v-for="hora in horasGrid" :key="hora">
                 <td class="border border-gray-200 dark:border-gray-700 p-2 text-xs text-center text-gray-500">{{ hora }}:00</td>
-                <td v-for="dia in diasSemana" :key="dia" class="border border-gray-200 dark:border-gray-700 p-1 min-w-[130px]">
+                <td
+                  v-for="dia in diasSemana"
+                  :key="dia"
+                  @click="abrirModalCelda(dia, hora)"
+                  class="group relative border border-gray-200 dark:border-gray-700 p-1 min-w-[130px] h-10 cursor-pointer hover:bg-gray-50 dark:hover:bg-white/5"
+                >
                   <div
                     v-for="h in horariosEnCelda(dia, hora)"
                     :key="h.id"
-                    @click="abrirModal(h)"
+                    @click.stop="abrirModal(h)"
                     class="rounded p-1.5 mb-0.5 text-xs cursor-pointer transition-colors"
                     :class="h.paralelo_materia?.docente ? 'bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-300'"
                   >
                     <div class="font-medium truncate">{{ h.paralelo_materia?.materia?.nombre_materia }}</div>
                     <div class="truncate">{{ h.paralelo_materia?.paralelo?.grado }}°"{{ h.paralelo_materia?.paralelo?.paralelo }}"</div>
+                  </div>
+                  <div
+                    v-if="horariosEnCelda(dia, hora).length === 0"
+                    class="hidden group-hover:flex items-center justify-center h-full min-h-[28px] text-gray-300 dark:text-gray-600 group-hover:text-brand-500 pointer-events-none"
+                  >
+                    <span class="text-lg leading-none">+</span>
                   </div>
                 </td>
               </tr>
@@ -63,7 +84,7 @@
       </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal: fuera del panel derecho, no depende de ubicacionSeleccionada -->
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div class="bg-white dark:bg-gray-900 rounded-xl shadow-lg w-full max-w-lg p-6">
         <h3 class="text-lg font-semibold mb-4">{{ editando ? 'Editar Horario' : 'Nuevo Horario' }}</h3>
@@ -116,31 +137,31 @@
   </AdminLayout>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from 'vue'
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
 import { getHorarios, createHorario, updateHorario, deleteHorario, getAsignaciones, getUbicaciones } from '@/api/endpoints'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 
-const horarios = ref([])
-const asignaciones = ref([])
-const ubicaciones = ref([])
-const ubicacionSeleccionada = ref(null)
+const horarios = ref<any[]>([])
+const asignaciones = ref<any[]>([])
+const ubicaciones = ref<any[]>([])
+const ubicacionSeleccionada = ref<any>(null)
 const showModal = ref(false)
-const editando = ref(null)
+const editando = ref<any>(null)
 const saving = ref(false)
 const errorMsg = ref('')
 const diasSemana = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo']
-const form = ref({ paralelo_materia_id: '', dia_semana: 'lunes', hora_inicio: '08:00', hora_fin: '10:00', tipo_actividad: 'clase' })
+const form = ref<any>({ paralelo_materia_id: '', dia_semana: 'lunes', hora_inicio: '08:00', hora_fin: '10:00', tipo_actividad: 'clase' })
 
-const horasGrid = Array.from({ length: 14 }, (_, i) => i + 7) // 7:00 a 20:00
+const horasGrid = Array.from({ length: 14 }, (_, i) => i + 7)
 
-const seleccionarUbicacion = (ubi) => {
+const seleccionarUbicacion = (ubi: any) => {
   ubicacionSeleccionada.value = ubi
 }
 
-const horariosEnCelda = (dia, hora) => {
-  return horarios.value.filter(h => {
+const horariosEnCelda = (dia: string, hora: number) => {
+  return horarios.value.filter((h: any) => {
     if (h.ubicacion_id !== ubicacionSeleccionada.value?.id) return false
     if (h.dia_semana !== dia) return false
     const hInicio = parseInt(h.hora_inicio?.split(':')[0])
@@ -153,7 +174,7 @@ const cargarHorarios = async () => {
   try {
     const { data } = await getHorarios()
     horarios.value = data.data.data
-  } catch (e) { console.error(e) }
+  } catch (e: any) { console.error(e) }
 }
 
 const cargarCatalogos = async () => {
@@ -161,10 +182,10 @@ const cargarCatalogos = async () => {
     const [a, u] = await Promise.all([getAsignaciones(), getUbicaciones({ estado: 'activo' })])
     asignaciones.value = a.data.data.data
     ubicaciones.value = u.data.data.data
-  } catch (e) { console.error(e) }
+  } catch (e: any) { console.error(e) }
 }
 
-const abrirModal = (item = null) => {
+const abrirModal = (item: any = null) => {
   errorMsg.value = ''
   if (item) {
     editando.value = item
@@ -172,6 +193,19 @@ const abrirModal = (item = null) => {
   } else {
     editando.value = null
     form.value = { paralelo_materia_id: '', dia_semana: 'lunes', hora_inicio: '08:00', hora_fin: '10:00', tipo_actividad: 'clase' }
+  }
+  showModal.value = true
+}
+
+const abrirModalCelda = (dia: string, hora: number) => {
+  errorMsg.value = ''
+  editando.value = null
+  form.value = {
+    paralelo_materia_id: '',
+    dia_semana: dia,
+    hora_inicio: `${String(hora).padStart(2, '0')}:00`,
+    hora_fin: `${String(hora + 1).padStart(2, '0')}:00`,
+    tipo_actividad: 'clase'
   }
   showModal.value = true
 }
@@ -184,7 +218,7 @@ const guardar = async () => {
     else await createHorario(payload)
     showModal.value = false
     cargarHorarios()
-  } catch (e) {
+  } catch (e: any) {
     errorMsg.value = e.response?.data?.message || 'Error al guardar'
   } finally { saving.value = false }
 }
