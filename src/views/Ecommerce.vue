@@ -9,7 +9,7 @@
         <monthly-sale />
       </div>
 
-      <div class="col-span-12">
+      <!-- <div class="col-span-12">
         <statistics-chart />
       </div>
 
@@ -19,7 +19,7 @@
 
       <div class="col-span-12 xl:col-span-7">
         <recent-orders />
-      </div>
+      </div> -->
     </div>
   </admin-layout>
 </template>

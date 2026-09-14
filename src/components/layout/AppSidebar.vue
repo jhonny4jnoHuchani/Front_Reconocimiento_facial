@@ -3,7 +3,7 @@
     :class="[
       'fixed mt-16 flex flex-col lg:mt-0 top-0 px-5 left-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-99999 border-r border-gray-200',
       {
-        'lg:w-[290px]': isExpanded || isMobileOpen || isHovered,
+        'lg:w-[250px]': isExpanded || isMobileOpen || isHovered,
         'lg:w-[90px]': !isExpanded && !isHovered,
         'translate-x-0 w-[290px]': isMobileOpen,
         '-translate-x-full': !isMobileOpen,
@@ -15,15 +15,16 @@
   >
     <div
       :class="[
-        'py-8 flex',
+        'py-3 px-10 flex',
         !isExpanded && !isHovered ? 'lg:justify-center' : 'justify-start',
+        isMobileOpen ? 'hidden':'',
       ]"
     >
       <router-link to="/">
         <img
           v-if="isExpanded || isHovered || isMobileOpen"
-          class="dark:hidden"
-          src="/images/logo/logo.svg"
+          class="dark:hidden "
+          src="/images/LogoUpea.png"
           alt="Logo"
           width="150"
           height="40"
@@ -31,22 +32,15 @@
         <img
           v-if="isExpanded || isHovered || isMobileOpen"
           class="hidden dark:block"
-          src="/images/logo/logo-dark.svg"
+          src="/images/LogoUpeaDark.png"
           alt="Logo"
           width="150"
           height="40"
         />
-        <img
-          v-else
-          src="/images/logo/logo-icon.svg"
-          alt="Logo"
-          width="32"
-          height="32"
-        />
       </router-link>
     </div>
     <div
-      class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar"
+      class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar py-5 lg:py-0"
     >
       <nav class="mb-6">
         <div class="flex flex-col gap-4">
@@ -206,7 +200,7 @@
           </div>
         </div>
       </nav>
-      <SidebarWidget v-if="isExpanded || isHovered || isMobileOpen" />
+      <!-- <SidebarWidget v-if="isExpanded || isHovered || isMobileOpen" /> -->
     </div>
   </aside>
 </template>
@@ -316,7 +310,7 @@ const startTransition = (el) => {
   el.style.height = "auto";
   const height = el.scrollHeight;
   el.style.height = "0px";
-  el.offsetHeight; // force reflow
+  el.offsetHeight; 
   el.style.height = height + "px";
 };
 

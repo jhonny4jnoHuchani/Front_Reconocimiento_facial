@@ -1,206 +1,212 @@
 <template>
-  <div
-    class="rounded-2xl border border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-white/[0.03]"
-  >
-    <div
-      class="px-5 pt-5 bg-white shadow-default rounded-2xl pb-11 dark:bg-gray-900 sm:px-6 sm:pt-6"
-    >
-      <div class="flex justify-between">
-        <div>
-          <h3 class="text-lg font-semibold text-gray-800 dark:text-white/90">Monthly Target</h3>
-          <p class="mt-1 text-gray-500 text-theme-sm dark:text-gray-400">
-            Target you’ve set for each month
-          </p>
-        </div>
-        <div>
-          <DropdownMenu :menu-items="menuItems">
-            <template #icon>
-              <svg
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fillRule="evenodd"
-                  clipRule="evenodd"
-                  d="M10.2441 6C10.2441 5.0335 11.0276 4.25 11.9941 4.25H12.0041C12.9706 4.25 13.7541 5.0335 13.7541 6C13.7541 6.9665 12.9706 7.75 12.0041 7.75H11.9941C11.0276 7.75 10.2441 6.9665 10.2441 6ZM10.2441 18C10.2441 17.0335 11.0276 16.25 11.9941 16.25H12.0041C12.9706 16.25 13.7541 17.0335 13.7541 18C13.7541 18.9665 12.9706 19.75 12.0041 19.75H11.9941C11.0276 19.75 10.2441 18.9665 10.2441 18ZM11.9941 10.25C11.0276 10.25 10.2441 11.0335 10.2441 12C10.2441 12.9665 11.0276 13.75 11.9941 13.75H12.0041C12.9706 13.75 13.7541 12.9665 13.7541 12C13.7541 11.0335 12.9706 10.25 12.0041 10.25H11.9941Z"
-                  fill="currentColor"
-                />
-              </svg>
-            </template>
-          </DropdownMenu>
-        </div>
+  <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 md:p-6">
+    <div class="mb-4 flex items-center justify-between">
+      <div>
+        <h3 class="text-lg font-semibold text-gray-800 dark:text-white">
+          Actividad en Tiempo Real
+        </h3>
+        <p class="text-xs text-gray-500 dark:text-gray-400">
+          Últimas marcaciones registradas hoy
+        </p>
       </div>
-      <div class="relative max-h-[195px]">
-        <div id="chartTwo" class="h-full">
-          <div class="radial-bar-chart">
-            <VueApexCharts type="radialBar" height="330" :options="chartOptions" :series="series" />
-          </div>
-        </div>
-        <span
-          class="absolute left-1/2 top-[85%] -translate-x-1/2 -translate-y-[85%] rounded-full bg-success-50 px-3 py-1 text-xs font-medium text-success-600 dark:bg-success-500/15 dark:text-success-500"
-          >+10%</span
-        >
-      </div>
-      <p class="mx-auto mt-1.5 w-full max-w-[380px] text-center text-sm text-gray-500 sm:text-base">
-        You earn $3287 today, it's higher than last month. Keep up your good work!
-      </p>
+      <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+        <span class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        En vivo
+      </span>
     </div>
 
-    <div class="flex items-center justify-center gap-5 px-6 py-3.5 sm:gap-8 sm:py-5">
-      <div>
-        <p class="mb-1 text-center text-gray-500 text-theme-xs dark:text-gray-400 sm:text-sm">
-          Target
-        </p>
-        <p
-          class="flex items-center justify-center gap-1 text-base font-semibold text-gray-800 dark:text-white/90 sm:text-lg"
+    <div class="space-y-3 max-h-[350px] overflow-y-auto pr-1">
+      <TransitionGroup name="list">
+        <div 
+          v-for="registro in marcaciones" 
+          :key="registro.id"
+          class="flex items-center justify-between rounded-xl border border-gray-100 bg-gray-50/50 p-3.5 transition-all dark:border-gray-800 dark:bg-gray-800/50"
         >
-          $20K
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M7.26816 13.6632C7.4056 13.8192 7.60686 13.9176 7.8311 13.9176C7.83148 13.9176 7.83187 13.9176 7.83226 13.9176C8.02445 13.9178 8.21671 13.8447 8.36339 13.6981L12.3635 9.70076C12.6565 9.40797 12.6567 8.9331 12.3639 8.6401C12.0711 8.34711 11.5962 8.34694 11.3032 8.63973L8.5811 11.36L8.5811 2.5C8.5811 2.08579 8.24531 1.75 7.8311 1.75C7.41688 1.75 7.0811 2.08579 7.0811 2.5L7.0811 11.3556L4.36354 8.63975C4.07055 8.34695 3.59568 8.3471 3.30288 8.64009C3.01008 8.93307 3.01023 9.40794 3.30321 9.70075L7.26816 13.6632Z"
-              fill="#D92D20"
-            />
-          </svg>
-        </p>
-      </div>
+          <div class="flex items-center gap-3">
+          
+            <div class="h-10 w-10 overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0">
+              <img 
+                v-if="registro.docente_foto" 
+                :src="registro.docente_foto" 
+                :alt="registro.docente_nombre"
+                class="h-full w-full object-cover"
+                @error="registro.docente_foto = null"
+              />
+              <div 
+                v-else 
+                class="flex h-full w-full items-center justify-center text-sm font-bold text-gray-700 dark:text-gray-200"
+              >
+                {{ obtenerIniciales(registro.docente_nombre) }}
+              </div>
+            </div>
 
-      <div class="w-px bg-gray-200 h-7 dark:bg-gray-800"></div>
+            <div>
+              <p class="text-sm font-semibold text-gray-800 dark:text-white">
+                {{ registro.docente_nombre }}
+              </p>
+              <p class="text-xs text-gray-500 dark:text-gray-400">
+                {{ registro.hora }}
+              </p>
+            </div>
+          </div>
 
-      <div>
-        <p class="mb-1 text-center text-gray-500 text-theme-xs dark:text-gray-400 sm:text-sm">
-          Revenue
-        </p>
-        <p
-          class="flex items-center justify-center gap-1 text-base font-semibold text-gray-800 dark:text-white/90 sm:text-lg"
-        >
-          $20K
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M7.60141 2.33683C7.73885 2.18084 7.9401 2.08243 8.16435 2.08243C8.16475 2.08243 8.16516 2.08243 8.16556 2.08243C8.35773 2.08219 8.54998 2.15535 8.69664 2.30191L12.6968 6.29924C12.9898 6.59203 12.9899 7.0669 12.6971 7.3599C12.4044 7.6529 11.9295 7.65306 11.6365 7.36027L8.91435 4.64004L8.91435 13.5C8.91435 13.9142 8.57856 14.25 8.16435 14.25C7.75013 14.25 7.41435 13.9142 7.41435 13.5L7.41435 4.64442L4.69679 7.36025C4.4038 7.65305 3.92893 7.6529 3.63613 7.35992C3.34333 7.06693 3.34348 6.59206 3.63646 6.29926L7.60141 2.33683Z"
-              fill="#039855"
-            />
-          </svg>
-        </p>
-      </div>
+          <div>
+            <span 
+              v-if="registro.tipo === 'entrada'"
+              class="inline-flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400"
+            >
+              ↓ Entrada
+            </span>
+            <span 
+              v-else
+              class="inline-flex items-center gap-1 rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-600 dark:bg-amber-500/10 dark:text-amber-400"
+            >
+              ↑ Salida
+            </span>
+          </div>
+        </div>
+      </TransitionGroup>
 
-      <div class="w-px bg-gray-200 h-7 dark:bg-gray-800"></div>
-
-      <div>
-        <p class="mb-1 text-center text-gray-500 text-theme-xs dark:text-gray-400 sm:text-sm">
-          Today
-        </p>
-        <p
-          class="flex items-center justify-center gap-1 text-base font-semibold text-gray-800 dark:text-white/90 sm:text-lg"
-        >
-          $20K
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              fill-rule="evenodd"
-              clip-rule="evenodd"
-              d="M7.60141 2.33683C7.73885 2.18084 7.9401 2.08243 8.16435 2.08243C8.16475 2.08243 8.16516 2.08243 8.16556 2.08243C8.35773 2.08219 8.54998 2.15535 8.69664 2.30191L12.6968 6.29924C12.9898 6.59203 12.9899 7.0669 12.6971 7.3599C12.4044 7.6529 11.9295 7.65306 11.6365 7.36027L8.91435 4.64004L8.91435 13.5C8.91435 13.9142 8.57856 14.25 8.16435 14.25C7.75013 14.25 7.41435 13.9142 7.41435 13.5L7.41435 4.64442L4.69679 7.36025C4.4038 7.65305 3.92893 7.6529 3.63613 7.35992C3.34333 7.06693 3.34348 6.59206 3.63646 6.29926L7.60141 2.33683Z"
-              fill="#039855"
-            />
-          </svg>
-        </p>
+      <div v-if="marcaciones.length === 0" class="py-8 text-center text-sm text-gray-400">
+        Esperando marcaciones del día...
       </div>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, computed } from 'vue'
-import DropdownMenu from '../common/DropdownMenu.vue'
-const menuItems = [
-  { label: 'View More', onClick: () => console.log('View More clicked') },
-  { label: 'Delete', onClick: () => console.log('Delete clicked') },
-]
-import VueApexCharts from 'vue3-apexcharts'
+<script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
+import { getMarcadosPendientesAdmin, getDocentes } from '@/api/endpoints' 
 
-const props = defineProps({
-  value: {
-    type: Number,
-    default: 75.55,
-  },
+const marcaciones = ref([])
+const mapaDocentes = ref(new Map())
+let timerPolling = null
+
+const obtenerFechaHoy = () => {
+  const hoy = new Date()
+  const year = hoy.getFullYear()
+  const month = String(hoy.getMonth() + 1).padStart(2, '0')
+  const day = String(hoy.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+const obtenerIniciales = (nombre) => {
+  if (!nombre || nombre === 'Sin nombre') return 'D'
+  return nombre
+    .trim()
+    .split(' ')
+    .filter(Boolean)
+    .map(n => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase()
+}
+
+// Genera la URL completa de la foto de perfil
+const construirUrlFoto = (pathFoto) => {
+  if (!pathFoto) return null
+
+  // Si viene un objeto o array por error en la propiedad, intentamos extraer el string de la ruta
+  if (typeof pathFoto === 'object') {
+    pathFoto = pathFoto.url || pathFoto.path || pathFoto[0]?.url || pathFoto[0]?.path || null
+  }
+
+  if (!pathFoto || typeof pathFoto !== 'string') return null
+
+  if (pathFoto.startsWith('http://') || pathFoto.startsWith('https://')) {
+    return pathFoto
+  }
+
+  const baseURL = 'http://186.121.212.87:1011/storage/' 
+  return `${baseURL}${pathFoto.replace(/^\/+/, '')}`
+}
+
+const cargarMapaDocentes = async () => {
+  try {
+    const { data } = await getDocentes()
+    const lista = data?.data?.data || data?.data || []
+    
+    const mapa = new Map()
+    
+    lista.forEach(docente => {
+      const nombre = docente.user?.nombre_completo || docente.user?.name || 'Docente'
+      
+      // Extrae la propiedad correcta de la foto (string o primer ítem de array)
+      const rawFoto = docente.user?.foto_perfil || 
+                      docente.user?.fotos_perfil || 
+                      docente.user?.foto || 
+                      docente.foto_perfil || 
+                      docente.foto
+
+      const fotoUrl = construirUrlFoto(rawFoto)
+
+      const infoDocente = { nombre, foto: fotoUrl }
+
+      // Mapeamos tanto por ID de docente como por ID de usuario para asegurar la coincidencia
+      if (docente.id) mapa.set(docente.id, infoDocente)
+      if (docente.user_id) mapa.set(docente.user_id, infoDocente)
+    })
+
+    mapaDocentes.value = mapa
+  } catch (error) {
+    console.error('Error al obtener la lista de docentes:', error)
+  }
+}
+
+const cargarMarcaciones = async () => {
+  try {
+    const response = await getMarcadosPendientesAdmin({
+      fecha: obtenerFechaHoy()
+    })
+
+    if (response.data?.success || Array.isArray(response.data?.data)) {
+      const lista = response.data.data || []
+
+      marcaciones.value = lista.map(item => {
+        const datosDocente = mapaDocentes.value.get(item.docente_id) || mapaDocentes.value.get(item.user_id)
+        
+        const nombreResuelto = item.docente_nombre !== 'Sin nombre' && item.docente_nombre
+          ? item.docente_nombre 
+          : (datosDocente?.nombre || 'Docente')
+        const fotoResuelta = datosDocente?.foto 
+
+        return {
+          id: item.id,
+          docente_nombre: nombreResuelto,
+          docente_foto: fotoResuelta,
+          hora: item.hora_marcado || item.hora,
+          tipo: item.tipo_marcado || item.tipo
+        }
+      })
+    }
+  } catch (error) {
+    console.error('Error al consultar marcaciones:', error)
+  }
+}
+
+onMounted(async () => {
+  await cargarMapaDocentes()
+  await cargarMarcaciones()
+
+  timerPolling = setInterval(cargarMarcaciones, 3000)
 })
 
-const series = computed(() => [props.value])
-
-const chartOptions = {
-  colors: ['#465FFF'],
-  chart: {
-    fontFamily: 'Outfit, sans-serif',
-    sparkline: {
-      enabled: true,
-    },
-  },
-  plotOptions: {
-    radialBar: {
-      startAngle: -90,
-      endAngle: 90,
-      hollow: {
-        size: '80%',
-      },
-      track: {
-        background: '#E4E7EC',
-        strokeWidth: '100%',
-        margin: 5,
-      },
-      dataLabels: {
-        name: {
-          show: false,
-        },
-        value: {
-          fontSize: '36px',
-          fontWeight: '600',
-          offsetY: 60,
-          color: '#1D2939',
-          formatter: function (val: number) {
-            return val.toFixed(2) + '%'
-          },
-        },
-      },
-    },
-  },
-  fill: {
-    type: 'solid',
-    colors: ['#465FFF'],
-  },
-  stroke: {
-    lineCap: 'round',
-  },
-  labels: ['Progress'],
-}
+onUnmounted(() => {
+  if (timerPolling) clearInterval(timerPolling)
+})
 </script>
 
 <style scoped>
-.radial-bar-chart {
-  width: 100%;
-  max-width: 330px;
-  margin: 0 auto;
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.4s ease;
+}
+.list-enter-from {
+  opacity: 0;
+  transform: translateY(-15px);
+}
+.list-leave-to {
+  opacity: 0;
+  transform: translateX(20px);
 }
 </style>

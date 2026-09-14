@@ -1,166 +1,354 @@
 <template>
   <FullScreenLayout>
-    <div class="relative p-6 bg-white z-1 dark:bg-gray-900 sm:p-0">
-      <div
-        class="relative flex flex-col justify-center w-full h-screen lg:flex-row dark:bg-gray-900"
-      >
-        <div class="flex flex-col flex-1 w-full lg:w-1/2">
-          <div class="w-full max-w-md pt-10 mx-auto">
-            <router-link
-              to="/"
-              class="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
-            >
-              <svg
-                class="stroke-current"
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 20 20"
-                fill="none"
-              >
-                <path
-                  d="M12.7083 5L7.5 10.2083L12.7083 15.4167"
-                  stroke=""
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-              Volver al inicio
-            </router-link>
+    <div
+      class="min-h-screen bg-gradient-to-br from-slate-100 via-white to-blue-50
+             flex items-center justify-center p-4"
+    >
+
+      <div class="w-full max-w-md">
+
+        <!-- Encabezado -->
+        <div class="text-center mb-7">
+
+          <div
+            class="mx-auto flex h-24 w-24 items-center justify-center
+                   rounded-2xl bg-white border border-slate-200
+                   shadow-md"
+          >
+            <img
+              src="/public/images/logo/mi-control-upea.png"
+              alt="Mi Control UPEA"
+              class="h-20 w-auto object-contain"
+            />
           </div>
-          <div class="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
-            <div>
-              <div class="mb-5 sm:mb-8">
-                <h1
-                  class="mb-2 font-semibold text-gray-800 text-title-sm dark:text-white/90 sm:text-title-md"
-                >
-                  Iniciar Sesión
-                </h1>
-                <p class="text-sm text-gray-500 dark:text-gray-400">
-                  Ingresa tu email y contraseña para acceder
-                </p>
-              </div>
-              <div>
-                <form @submit.prevent="handleSubmit">
-                  <div class="space-y-5">
-                    <!-- Email -->
-                    <div>
-                      <label
-                        for="email"
-                        class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                      >
-                        Email<span class="text-error-500">*</span>
-                      </label>
-                      <input
-                        v-model="email"
-                        type="email"
-                        id="email"
-                        placeholder="admin@sistema.com"
-                        class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                      />
-                    </div>
-                    <!-- Contraseña -->
-                    <div>
-                      <label
-                        for="password"
-                        class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400"
-                      >
-                        Contraseña<span class="text-error-500">*</span>
-                      </label>
-                      <div class="relative">
-                        <input
-                          v-model="password"
-                          :type="showPassword ? 'text' : 'password'"
-                          id="password"
-                          placeholder="Ingresa tu contraseña"
-                          class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pl-4 pr-11 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800"
-                        />
-                        <span
-                          @click="togglePasswordVisibility"
-                          class="absolute z-30 text-gray-500 -translate-y-1/2 cursor-pointer right-4 top-1/2 dark:text-gray-400"
-                        >
-                          <svg
-                            v-if="!showPassword"
-                            class="fill-current"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 20 20"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              clip-rule="evenodd"
-                              d="M10.0002 13.8619C7.23361 13.8619 4.86803 12.1372 3.92328 9.70241C4.86804 7.26761 7.23361 5.54297 10.0002 5.54297C12.7667 5.54297 15.1323 7.26762 16.0771 9.70243C15.1323 12.1372 12.7667 13.8619 10.0002 13.8619ZM10.0002 4.04297C6.48191 4.04297 3.49489 6.30917 2.4155 9.4593C2.3615 9.61687 2.3615 9.78794 2.41549 9.94552C3.49488 13.0957 6.48191 15.3619 10.0002 15.3619C13.5184 15.3619 16.5055 13.0957 17.5849 9.94555C17.6389 9.78797 17.6389 9.6169 17.5849 9.45932C16.5055 6.30919 13.5184 4.04297 10.0002 4.04297ZM9.99151 7.84413C8.96527 7.84413 8.13333 8.67606 8.13333 9.70231C8.13333 10.7286 8.96527 11.5605 9.99151 11.5605H10.0064C11.0326 11.5605 11.8646 10.7286 11.8646 9.70231C11.8646 8.67606 11.0326 7.84413 10.0064 7.84413H9.99151Z"
-                              fill="#98A2B3"
-                            />
-                          </svg>
-                          <svg
-                            v-else
-                            class="fill-current"
-                            width="20"
-                            height="20"
-                            viewBox="0 0 20 20"
-                            fill="none"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              fill-rule="evenodd"
-                              clip-rule="evenodd"
-                              d="M4.63803 3.57709C4.34513 3.2842 3.87026 3.2842 3.57737 3.57709C3.28447 3.86999 3.28447 4.34486 3.57737 4.63775L4.85323 5.91362C3.74609 6.84199 2.89363 8.06395 2.4155 9.45936C2.3615 9.61694 2.3615 9.78801 2.41549 9.94558C3.49488 13.0957 6.48191 15.3619 10.0002 15.3619C11.255 15.3619 12.4422 15.0737 13.4994 14.5598L15.3625 16.4229C15.6554 16.7158 16.1302 16.7158 16.4231 16.4229C16.716 16.13 16.716 15.6551 16.4231 15.3622L4.63803 3.57709ZM12.3608 13.4212L10.4475 11.5079C10.3061 11.5423 10.1584 11.5606 10.0064 11.5606H9.99151C8.96527 11.5606 8.13333 10.7286 8.13333 9.70237C8.13333 9.5461 8.15262 9.39434 8.18895 9.24933L5.91885 6.97923C5.03505 7.69015 4.34057 8.62704 3.92328 9.70247C4.86803 12.1373 7.23361 13.8619 10.0002 13.8619C10.8326 13.8619 11.6287 13.7058 12.3608 13.4212ZM16.0771 9.70249C15.7843 10.4569 15.3552 11.1432 14.8199 11.7311L15.8813 12.7925C16.6329 11.9813 17.2187 11.0143 17.5849 9.94561C17.6389 9.78803 17.6389 9.61696 17.5849 9.45938C16.5055 6.30925 13.5184 4.04303 10.0002 4.04303C9.13525 4.04303 8.30244 4.17999 7.52218 4.43338L8.75139 5.66259C9.1556 5.58413 9.57311 5.54303 10.0002 5.54303C12.7667 5.54303 15.1323 7.26768 16.0771 9.70249Z"
-                              fill="#98A2B3"
-                            />
-                          </svg>
-                        </span>
-                      </div>
-                    </div>
-                    <!-- Error -->
-                    <p v-if="error" class="text-sm text-red-500">{{ error }}</p>
-                    <!-- Botón -->
-                    <div>
-                      <button
-                        type="submit"
-                        :disabled="loading"
-                        class="flex items-center justify-center w-full px-4 py-3 text-sm font-medium text-white transition rounded-lg bg-brand-500 shadow-theme-xs hover:bg-brand-600 disabled:opacity-50"
-                      >
-                        {{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
-                      </button>
-                    </div>
-                  </div>
-                </form>
-              </div>
-            </div>
+
+          <h1 class="mt-4 text-2xl font-bold tracking-tight text-slate-800">
+            Mi Control UPEA
+          </h1>
+
+          <div class="mx-auto mt-2 flex items-center justify-center gap-2">
+            <span class="h-1 w-8 rounded-full bg-blue-800"></span>
+            <span class="h-1 w-3 rounded-full bg-red-600"></span>
           </div>
+
+          <p class="mt-2 text-sm font-medium text-slate-500">
+            Carrera de Medicina
+          </p>
         </div>
+
+
+        <!-- Card -->
         <div
-          class="relative items-center hidden w-full h-full lg:w-1/2 bg-brand-950 dark:bg-white/5 lg:grid"
+          class="rounded-xl border border-slate-200 bg-white
+                 shadow-[0_8px_30px_rgb(15,23,42,0.08)]
+                 overflow-hidden"
         >
-          <div class="flex items-center justify-center z-1">
-            <common-grid-shape />
-            <div class="flex flex-col items-center max-w-xs">
-              <router-link to="/" class="block mb-4">
-                <img width="231" height="48" src="/images/logo/auth-logo.svg" alt="Logo" />
-              </router-link>
-              <p class="text-center text-gray-400 dark:text-white/60">
-                Sistema de Asistencia Docente
+
+          <!-- Barra superior -->
+          <div class="h-1.5 bg-blue-800"></div>
+
+          <div class="p-7 sm:p-8">
+
+            <!-- Título -->
+            <div class="mb-7">
+              <h2 class="text-xl font-semibold text-slate-800">
+                Iniciar sesión
+              </h2>
+
+              <p class="mt-1.5 text-sm text-slate-500">
+                Ingrese sus datos para acceder al sistema.
               </p>
             </div>
+
+
+            <!-- Formulario -->
+            <form
+              @submit.prevent="handleSubmit"
+              class="space-y-5"
+            >
+
+              <!-- Correo -->
+              <div>
+                <label
+                  for="email"
+                  class="mb-2 block text-sm font-semibold text-slate-700"
+                >
+                  Correo electrónico
+                </label>
+
+                <div class="relative">
+
+                  <div
+                    class="pointer-events-none absolute inset-y-0 left-0
+                           flex items-center pl-3.5 text-slate-400"
+                  >
+                    <svg
+                      class="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                      />
+                    </svg>
+                  </div>
+
+                  <input
+                    v-model="email"
+                    id="email"
+                    type="email"
+                    required
+                    autocomplete="email"
+                    placeholder="correo@upea.edu.bo"
+                    class="h-11 w-full rounded-lg border border-slate-300
+                           bg-slate-50 pl-11 pr-3 text-sm text-slate-800
+                           placeholder:text-slate-400
+                           transition-all duration-150
+                           hover:border-slate-400
+                           focus:border-blue-700
+                           focus:bg-white
+                           focus:outline-none
+                           focus:ring-3 focus:ring-blue-700/10"
+                  />
+
+                </div>
+              </div>
+
+
+              <!-- Contraseña -->
+              <div>
+                <div class="mb-2 flex items-center justify-between">
+
+                  <label
+                    for="password"
+                    class="block text-sm font-semibold text-slate-700"
+                  >
+                    Contraseña
+                  </label>
+
+                </div>
+
+                <div class="relative">
+
+                  <div
+                    class="pointer-events-none absolute inset-y-0 left-0
+                           flex items-center pl-3.5 text-slate-400"
+                  >
+                    <svg
+                      class="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
+                    </svg>
+                  </div>
+
+
+                  <input
+                    v-model="password"
+                    id="password"
+                    :type="showPassword ? 'text' : 'password'"
+                    required
+                    autocomplete="current-password"
+                    placeholder="Ingrese su contraseña"
+                    class="h-11 w-full rounded-lg border border-slate-300
+                           bg-slate-50 pl-11 pr-11 text-sm text-slate-800
+                           placeholder:text-slate-400
+                           transition-all duration-150
+                           hover:border-slate-400
+                           focus:border-blue-700
+                           focus:bg-white
+                           focus:outline-none
+                           focus:ring-3 focus:ring-blue-700/10"
+                  />
+
+
+                  <!-- Mostrar contraseña -->
+                  <button
+                    type="button"
+                    @click="togglePasswordVisibility"
+                    class="absolute right-3.5 top-1/2
+                           -translate-y-1/2
+                           text-slate-400
+                           transition-colors
+                           hover:text-blue-700
+                           focus:outline-none"
+                  >
+
+                    <svg
+                      v-if="!showPassword"
+                      class="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                      />
+
+                      <circle
+                        cx="12"
+                        cy="12"
+                        r="3"
+                        stroke-width="1.8"
+                      />
+                    </svg>
+
+                    <svg
+                      v-else
+                      class="h-5 w-5"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="1.8"
+                        d="M3 3l18 18M10.58 10.58A2 2 0 0012 14a2 2 0 001.42-.58M9.88 5.09A9.7 9.7 0 0112 5c4.48 0 8.27 2.94 9.54 7a9.7 9.7 0 01-2.04 3.34M6.61 6.61A9.7 9.7 0 002.46 12C3.73 16.06 7.52 19 12 19a9.7 9.7 0 005.39-1.61"
+                      />
+                    </svg>
+
+                  </button>
+
+                </div>
+              </div>
+
+
+              <!-- Error -->
+              <div
+                v-if="error"
+                class="flex items-start gap-2 rounded-lg
+                       border border-red-200 bg-red-50
+                       px-3.5 py-3 text-sm text-red-600"
+              >
+
+                <svg
+                  class="mt-0.5 h-4 w-4 shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M12 9v4m0 4h.01M10.29 3.86l-8.18 14a2 2 0 001.73 3h16.32a2 2 0 001.73-3l-8.18-14a2 2 0 00-3.46 0z"
+                  />
+                </svg>
+
+                <span>
+                  {{ error }}
+                </span>
+
+              </div>
+
+
+              <!-- Botón -->
+              <button
+                type="submit"
+                :disabled="loading"
+                class="mt-2 flex h-11 w-full items-center
+                       justify-center rounded-lg
+                       bg-blue-800
+                       text-sm font-semibold text-white
+                       shadow-sm
+                       transition-all duration-150
+                       hover:bg-blue-900
+                       hover:shadow-md
+                       focus:outline-none
+                       focus:ring-3 focus:ring-blue-800/20
+                       active:scale-[0.99]
+                       disabled:cursor-not-allowed
+                       disabled:opacity-60"
+              >
+                <span v-if="!loading">
+                  Iniciar sesión
+                </span>
+
+                <span
+                  v-else
+                  class="flex items-center gap-2"
+                >
+                  <svg
+                    class="h-4 w-4 animate-spin"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      class="opacity-30"
+                      cx="12"
+                      cy="12"
+                      r="9"
+                      stroke="currentColor"
+                      stroke-width="3"
+                    />
+
+                    <path
+                      d="M21 12a9 9 0 00-9-9"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                    />
+                  </svg>
+
+                  Ingresando...
+                </span>
+              </button>
+
+            </form>
+
           </div>
+
+
+          <!-- Footer de la tarjeta -->
+          <div
+            class="border-t border-slate-100 bg-slate-50
+                   px-7 py-4 text-center"
+          >
+            <p class="text-xs text-slate-500">
+              Acceso exclusivo para personal autorizado
+            </p>
+          </div>
+
         </div>
+
+
+        <!-- Pie -->
+        <div class="mt-5 text-center">
+          <p class="text-xs text-slate-400">
+            Universidad Pública de El Alto · Carrera de Medicina
+          </p>
+        </div>
+
       </div>
+
     </div>
   </FullScreenLayout>
 </template>
+
 
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api/config'
-import CommonGridShape from '@/components/common/CommonGridShape.vue'
 import FullScreenLayout from '@/components/layout/FullScreenLayout.vue'
 
 const router = useRouter()
+
 const email = ref('')
 const password = ref('')
 const showPassword = ref(false)
@@ -174,23 +362,37 @@ const togglePasswordVisibility = () => {
 const handleSubmit = async () => {
   loading.value = true
   error.value = ''
-  
+
   try {
     const response = await api.post('/auth/login', {
       email: email.value,
       password: password.value,
-      device_id: '1'
+      device_id: '1',
     })
-    
+
     localStorage.setItem('token', response.data.token)
-    localStorage.setItem('user', JSON.stringify(response.data.user))
-    
+    localStorage.setItem(
+      'user',
+      JSON.stringify(response.data.user)
+    )
+
     router.push('/')
-    } catch (err: unknown) {
-      const axiosError = err as { response?: { data?: { message?: string } } }
-      error.value = axiosError.response?.data?.message || 'Error al iniciar sesión'
-    } finally {
-      loading.value = false
+
+  } catch (err: unknown) {
+    const axiosError = err as {
+      response?: {
+        data?: {
+          message?: string
+        }
+      }
     }
+
+    error.value =
+      axiosError.response?.data?.message ||
+      'Correo o contraseña incorrectos'
+
+  } finally {
+    loading.value = false
+  }
 }
 </script>
