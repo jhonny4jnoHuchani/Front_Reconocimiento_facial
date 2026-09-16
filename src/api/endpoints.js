@@ -53,6 +53,7 @@ export const marcarEntrada = (data) => api.post('/marcados/entrada', data)
 export const marcarSalida = (data) => api.post('/marcados/salida', data)
 
 // ── Admin Marcados ───────────────────────────────────
+
 export const getMarcadosPendientesAdmin = (params) => api.get('/admin/marcados/pendientes', { params })
-export const getMarcadosHoyAdmin = (params) => api.get('/admin/marcados/hoy', { params })
+export const getMarcadosHoyAdmin = (params) => api.get('/admin/marcados/pendientes', { params })
 export const validarMarcadoAdmin = (id, data) => api.post(`/admin/marcados/${id}/validar`, data)
