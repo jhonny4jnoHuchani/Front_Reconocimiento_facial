@@ -7,7 +7,7 @@
           Actividad en Tiempo Real
         </h3>
         <p class="text-xs text-gray-500 dark:text-gray-400">
-          Sincronización directa por marcados pendientes de hoy
+          Marcados el dia de hoy
         </p>
       </div>
       <span class="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
@@ -79,10 +79,10 @@
       </div>
     </div>
 
-    <!-- SECCIÓN INFERIOR: Clases programadas que aún faltan marcar -->
+
     <div class="border-t border-gray-100 pt-4 dark:border-gray-800">
       <h4 class="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center justify-between">
-        <span>Faltan marcar hoy (Con clases programadas)</span>
+        <span>Docentes que faltan marcar el dia de hoy</span>
         <span class="rounded-full bg-rose-100 px-2 py-0.5 text-xs text-rose-700 dark:bg-rose-950 dark:text-rose-300">
           {{ clasesFaltantesHoy.length }}
         </span>

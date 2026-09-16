@@ -66,7 +66,7 @@
                     <div class="flex items-center gap-2">
                        <button
                           @click="abrirModal(item)"
-                          class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition flex justify-between gap-2"
+                          class="p-2 text-blue-600 border-b-2 border-transparent hover:border-blue-600 dark:hover:border-blue-400 rounded-lg transition flex items-center justify-between gap-1.5"
                           title="Editar"
                         >
                           <Pencil :size="18" />
@@ -75,7 +75,7 @@
                         <button
                           v-if="item.estado === 'activo'"
                           @click="eliminar(item.id)"
-                          class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition flex justify-between gap-2"
+                          class="p-2 text-red-600 border-b-2 border-transparent hover:border-red-600 dark:hover:border-red-400 rounded-lg transition flex items-center justify-between gap-1.5"
                           title="Desactivar"
                         >
                           <Ban :size="18" />
@@ -194,34 +194,63 @@ const guardar = async () => {
 const eliminar = async (id) => {
   const isDark = document.documentElement.classList.contains('dark')
   const result = await Swal.fire({
-    title: '¿Eliminar Materia?',
+    title: '¿Desea eliminar la Materia?',
+    text: 'Esta acción eliminara la materia seleccionada.',
     icon: 'warning',
     showCancelButton: true,
-    confirmButtonText: 'Sí, eliminar',
+    confirmButtonText: 'Sí, desactivar',
     cancelButtonText: 'Cancelar',
-    confirmButtonColor: '#dc2626',
-    cancelButtonColor: '#9ca3af',  
     reverseButtons: true,
-    background: isDark ? '#374151' : '#ffffff',
-    color: isDark ? '#f9fafb' : '#1f2937'  , 
+    focusCancel: true,
+    background: isDark ? '#0f172a' : '#ffffff',
+    color: isDark ? '#f8fafc' : '#1e293b',
+
+    showClass: {
+      popup: 'animate__animated animate__fadeInUp animate__faster',
+    },
+    hideClass: {
+      popup: 'animate__animated animate__fadeOutDown animate__faster',
+    },
     customClass: {
-      popup: 'font-sans rounded-2xl shadow-2xl border border-slate-700/20' 
-    }       
+      popup:
+        'font-sans rounded-[3rem] border border-rose-500/20 dark:border-slate-700/60 p-8 shadow-2xl shadow-rose-500/5 backdrop-blur-xl',
+      title: 'text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100',
+      htmlContainer: 'text-sm font-medium text-slate-500 dark:text-slate-400 mt-2',
+      confirmButton:
+        'px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 active:scale-95 text-white font-bold text-sm transition-all duration-200 shadow-lg shadow-rose-500/25 focus:ring-4 focus:ring-rose-500/20 focus:outline-none ml-3 tracking-wide',
+      cancelButton:
+        'px-6 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 active:scale-95 text-slate-600 font-bold text-sm transition-all duration-200 border border-slate-200/60 dark:border-slate-700/60 focus:outline-none tracking-wide',
+      icon: 'border-0 scale-90 -mb-1',
+    },
+    buttonsStyling: false,
   })
 
   if (result.isConfirmed) {
     await deleteMateria(id)
     cargar()
 
-    Swal.fire({
-      title: 'Eliminado',
-      text: 'La Materia ha sido eliminada.',
-      icon: 'success',
-      timer: 1500,
-      showConfirmButton: false,
-      background: '#ffffff',
-      color: '#1f2937'
-    })
+Swal.fire({
+        title: '¡Eliminado!',
+        text: 'La materia ha sido eliminada con exito.',
+        icon: 'success',
+        timer: 1800,
+        timerProgressBar: true,
+        showConfirmButton: false,
+        background: isDark ? '#0f172a' : '#ffffff',
+        color: isDark ? '#f8fafc' : '#1e293b',
+        showClass: {
+          popup: 'animate__animated animate__fadeInUp animate__faster',
+        },
+        hideClass: {
+          popup: 'animate__animated animate__fadeOutDown animate__faster',
+        },
+        customClass: {
+          popup:
+            'font-sans rounded-[2.5rem] border border-emerald-500/20 dark:border-slate-700/60 p-6 shadow-2xl shadow-emerald-500/5',
+          title: 'text-xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight',
+          htmlContainer: 'text-sm font-medium text-slate-500 dark:text-slate-400 mt-1',
+        },
+      })
   }
 }
 
