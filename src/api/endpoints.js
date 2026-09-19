@@ -57,3 +57,20 @@ export const marcarSalida = (data) => api.post('/marcados/salida', data)
 export const getMarcadosPendientesAdmin = (params) => api.get('/admin/marcados/pendientes', { params })
 export const getMarcadosHoyAdmin = (params) => api.get('/admin/marcados/pendientes', { params })
 export const validarMarcadoAdmin = (id, data) => api.post(`/admin/marcados/${id}/validar`, data)
+
+// ── Carreras ─────────────────────────────────────────
+export const getCarreras = (params) => api.get('/carreras', { params })
+export const createCarrera = (data) => api.post('/carreras', data)
+export const updateCarrera = (id, data) => api.put(`/carreras/${id}/actualizar`, data)
+export const deleteCarrera = (id) => api.delete(`/carreras/${id}/eliminar`)
+export const importarCarreras = (data) => api.post('/carreras/importar', data)
+
+// ── Reset dispositivo (admin) ────────────────────────
+export const buscarDocentePorCi = (ci) => api.get(`/docentes/buscar-por-ci/${ci}`)
+export const resetDispositivo = (userId) => api.patch(`/auth/reset-dispositivo/${userId}`)
+
+// ── Reconocimiento facial ────────────────────────────
+export const getReconocimientoEstado = (docenteId) => api.get(`/reconocimiento/estado/${docenteId}`)
+// ── Importar horarios ────────────────────────────────
+export const getImportarPreview = (params) => api.get('/importar/preview', { params })
+export const confirmarImportacion = (data) => api.post('/importar/confirmar', data)

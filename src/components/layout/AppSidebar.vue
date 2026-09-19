@@ -231,7 +231,14 @@ import { useSidebar } from "@/composables/useSidebar";
 const route = useRoute();
 
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
-const menuGroups = [
+
+// Leer user de localStorage
+const userRaw = localStorage.getItem('user')
+const user = userRaw ? JSON.parse(userRaw) : null
+const rol = user?.rol || null
+
+// Definir todo el menú con roles permitidos por item
+const menuCompleto = [
   {
     title: "Principal",
     items: [
@@ -239,21 +246,25 @@ const menuGroups = [
         icon: GridIcon,
         name: "Dashboard",
         path: "/",
+        roles: ['admin', 'supervisor'],
       },
       {
         icon: UserCircleIcon,
         name: "Docentes",
         path: "/docentes",
+        roles: ['admin', 'supervisor'],
       },
       {
         icon: DocsIcon,
         name: "Materias",
         path: "/materias",
+        roles: ['admin', 'supervisor'],
       },
       {
         icon: TableIcon,
         name: "Paralelos",
         path: "/paralelos",
+        roles: ['admin', 'supervisor'],
       },
     ],
   },
@@ -264,20 +275,72 @@ const menuGroups = [
         icon: PlugInIcon,
         name: "Asignaciones",
         path: "/asignaciones",
+        roles: ['admin', 'supervisor'],
       },
       {
         icon: PieChartIcon,
         name: "Ubicaciones",
         path: "/ubicaciones",
+        roles: ['admin', 'supervisor'],
       },
       {
         icon: CalenderIcon,
         name: "Horarios",
         path: "/horarios",
+        roles: ['admin', 'supervisor'],
+      },
+      // Rutas nuevas (descomentar cuando existan las vistas)
+      // {
+      //   icon: ListIcon,
+      //   name: "Importar Horarios",
+      //   path: "/importar",
+      //   roles: ['admin', 'supervisor'],
+      // },
+      {
+        icon: ListIcon,
+        name: "Validar Marcados",
+        path: "/marcados",
+        roles: ['admin', 'supervisor'],
       },
     ],
   },
+  {
+    title: "Administración",
+    items: [
+        {
+          icon: TableIcon,
+          name: "Carreras",
+          path: "/carreras",
+          roles: ['admin'],
+        },
+        {
+          icon: UserCircleIcon,  // o el que prefieras
+          name: "Resetear Dispositivo",
+          path: "/reset-dispositivo",
+          roles: ['admin'],
+        },
+      // {
+      //   icon: UserCircleIcon,
+      //   name: "Usuarios",
+      //   path: "/usuarios",
+      //   roles: ['admin'],
+      // },
+    ],
+  },
 ]
+
+// Filtrar por rol
+const menuGroups = computed(() => {
+  return menuCompleto
+    .map(group => ({
+      ...group,
+      items: group.items.filter(item => {
+        if (!item.roles) return true
+        return item.roles.includes(rol)
+      })
+    }))
+    .filter(group => group.items.length > 0)
+})
 
 const isActive = (path) => route.path === path;
 
@@ -287,7 +350,7 @@ const toggleSubmenu = (groupIndex, itemIndex) => {
 };
 
 const isAnySubmenuRouteActive = computed(() => {
-  return menuGroups.some((group) =>
+  return menuGroups.value.some((group) =>
     group.items.some(
       (item) =>
         item.subItems && item.subItems.some((subItem) => isActive(subItem.path))
@@ -300,7 +363,7 @@ const isSubmenuOpen = (groupIndex, itemIndex) => {
   return (
     openSubmenu.value === key ||
     (isAnySubmenuRouteActive.value &&
-      menuGroups[groupIndex].items[itemIndex].subItems?.some((subItem) =>
+      menuGroups.value[groupIndex].items[itemIndex].subItems?.some((subItem) =>
         isActive(subItem.path)
       ))
   );

@@ -54,6 +54,24 @@ const router = createRouter({
       component: () => import('../views/Horarios.vue'),
       meta: { title: 'Horarios', requiresAuth: true },
     },
+    {
+      path: '/carreras',
+      name: 'Carreras',
+      component: () => import('../views/Carreras.vue'),
+      meta: { title: 'Carreras', requiresAuth: true, roles: ['admin'] },
+    },
+    {
+      path: '/reset-dispositivo',
+      name: 'ResetDispositivo',
+      component: () => import('../views/ResetDispositivo.vue'),
+      meta: { title: 'Resetear Dispositivo', requiresAuth: true, roles: ['admin'] },
+    },
+    {
+      path: '/marcados',
+      name: 'MarcadosAdmin',
+      component: () => import('../views/MarcadosAdmin.vue'),
+      meta: { title: 'Validar Marcados', requiresAuth: true, roles: ['admin', 'supervisor'] },
+    },
   ],
 })
 
