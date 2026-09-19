@@ -312,17 +312,31 @@
                           class="ml-1 inline-block px-1.5 py-0.5 rounded text-[10px] bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
                         >Sin geocerca</span>
                       </td>
+
+
                       <td class="px-3 py-2">
-                        <select
-                          v-model="fila.ubicacion_id"
-                          class="h-9 w-full rounded-lg border border-gray-300 px-2 text-xs dark:bg-gray-800 dark:border-gray-700"
-                        >
-                          <option :value="null">-- Seleccionar --</option>
-                          <option v-for="u in ubicaciones" :key="u.id" :value="u.id">
-                            {{ u.nombre_lugar }} ({{ u.tipo }})
-                          </option>
-                        </select>
+                        <div class="flex gap-1">
+                          <select
+                            v-model="fila.ubicacion_id"
+                            class="h-9 flex-1 rounded-lg border border-gray-300 px-2 text-xs dark:bg-gray-800 dark:border-gray-700"
+                          >
+                            <option :value="null">-- Seleccionar --</option>
+                            <option v-for="u in ubicaciones" :key="u.id" :value="u.id">
+                              {{ u.nombre_lugar }} ({{ u.tipo }})
+                            </option>
+                          </select>
+                          <button
+                            @click="abrirCrearUbicacion(fila)"
+                            class="h-9 px-2 rounded-lg bg-brand-500 text-white hover:bg-brand-600 flex items-center"
+                            title="Crear ubicación"
+                          >
+                            <Plus :size="14" />
+                          </button>
+                        </div>
                       </td>
+
+
+
                     </tr>
                   </tbody>
                 </table>
@@ -352,15 +366,29 @@
           </div>
         </div>
       </div>
-
+<ModalUbicacion
+  v-model="showCrearUbicacion"
+  :prefill="{
+    nombre_lugar: filaParaUbicacion?.ambiente || '',
+    tipo: filaParaUbicacion?.tipo_ambiente || 'aula',
+    edificio_campus: filaParaUbicacion?.edificio || '',
+    piso: filaParaUbicacion?.piso || 0,
+    tolerancia_metros: 50,
+  }"
+  :carrera-id="preview?.carrera?.carrera_id"
+  :carrera-nombre="preview?.carrera?.nombre || ''"
+  @saved="onUbicacionCreada"
+/>
     </div>
+
+    
   </AdminLayout>
 </template>
 
 <script setup>
 import Swal from 'sweetalert2'
 import 'sweetalert2/dist/sweetalert2.min.css'
-import { Pencil, Ban, RotateCcw, UploadCloud, Search, X, CheckCircle } from 'lucide-vue-next'
+import { Pencil, Ban, RotateCcw, UploadCloud, Search, X, CheckCircle, Plus } from 'lucide-vue-next'
 import { ref, onMounted, computed } from 'vue'
 import {
   getDocentes, createDocente, updateDocente, deleteDocente, reactivarDocente,
@@ -369,6 +397,7 @@ import {
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
+import ModalUbicacion from '@/components/common/ModalUbicacion.vue'
 
 /* ============================================================
    CRUD DOCENTES
@@ -381,6 +410,8 @@ const showModal = ref(false)
 const editando = ref(null)
 const saving = ref(false)
 const errorMsg = ref('')
+const showCrearUbicacion = ref(false)
+const filaParaUbicacion = ref(null)
 
 const form = ref({
   nombre_completo: '',
@@ -586,6 +617,23 @@ const previsualizar = async () => {
 const filasImportadas = computed(() => preview.value?.filas.filter(f => f.ya_importado) || [])
 const filasNuevas = computed(() => preview.value?.filas.filter(f => !f.ya_importado) || [])
 const seleccionadas = computed(() => filasNuevas.value.filter(f => f.incluir))
+
+const abrirCrearUbicacion = (fila) => {
+  filaParaUbicacion.value = fila
+  showCrearUbicacion.value = true
+}
+
+const onUbicacionCreada = (ubicacion) => {
+  // Agregar al listado de ubicaciones
+  ubicaciones.value.push(ubicacion)
+
+  // Asignar a la fila que la invocó
+  if (filaParaUbicacion.value) {
+    filaParaUbicacion.value.ubicacion_id = ubicacion.id
+  }
+
+  filaParaUbicacion.value = null
+}
 
 const confirmarImportar = async () => {
   confirmando.value = true

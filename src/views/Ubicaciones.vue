@@ -156,154 +156,32 @@
         </div>
       </div>
 
-      <!-- Formulario Modal Responsivo -->
-      <div
-        v-if="showModal"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-3 sm:p-4 backdrop-blur-sm transition-all duration-300"
-        :class="[isExpanded || isHovered ? 'lg:ps-[290px]' : 'lg:ps-[90px]']"
-      >
-        <div
-          class="flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl sm:rounded-3xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-gray-900 dark:text-gray-300 overflow-hidden"
-        >
-          <!-- Modal Header -->
-          <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center shrink-0">
-            <h3 class="text-base sm:text-lg font-bold text-gray-900 dark:text-white">
-              {{ editandoId ? 'Editar Ubicación' : 'Nueva Ubicación' }}
-            </h3>
-            <button 
-              @click="cerrarModal" 
-              class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg transition-colors"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
 
-          <!-- Modal Content con Scroll -->
-          <div class="p-4 sm:p-6 overflow-y-auto space-y-4">
-            <form id="ubicacionForm" @submit.prevent="guardar" class="space-y-4">
-              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <label class="mb-1 block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300"> 
-                    Nombre 
-                  </label>
-                  <input
-                    v-model="form.nombre_lugar"
-                    type="text"
-                    required
-                    class="h-10 w-full rounded-xl border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                  />
-                </div>
+      <ModalUbicacion
+        v-model="showModal"
+        :ubicacion="editandoItem"
+        @saved="onUbicacionGuardada"
+      />
 
-                <div>
-                  <label class="mb-1 block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300"> 
-                    Tipo 
-                  </label>
-                  <select
-                    v-model="form.tipo"
-                    class="h-10 w-full rounded-xl border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                  >
-                    <option value="aula">Aula</option>
-                    <option value="laboratorio">Laboratorio</option>
-                    <option value="auditorio">Auditorio</option>
-                    <option value="exterior">Exterior</option>
-                  </select>
-                </div>
-              </div>
 
-              <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div>
-                  <label class="mb-1 block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300"> 
-                    Edificio / Campus 
-                  </label>
-                  <input
-                    v-model="form.edificio_campus"
-                    type="text"
-                    class="h-10 w-full rounded-xl border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                  />
-                </div>
 
-                <div>
-                  <label class="mb-1 block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300"> 
-                    Tolerancia (metros) 
-                  </label>
-                  <input
-                    v-model.number="form.tolerancia_metros"
-                    type="number"
-                    min="10"
-                    max="500"
-                    class="h-10 w-full rounded-xl border border-gray-300 px-3 text-sm focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 dark:border-gray-700 dark:bg-gray-800 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label class="mb-2 block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300"> 
-                  Dibujar polígono en el mapa 
-                </label>
-                <div class="rounded-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-                  <MapaPoligono v-if="showModal" v-model="coordenadas" />
-                </div>
-              </div>
-
-              <p v-if="errorMsg" class="text-sm font-medium text-red-500">
-                {{ errorMsg }}
-              </p>
-            </form>
-          </div>
-
-          <!-- Modal Footer (Botones) -->
-          <div class="p-4 border-t border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 shrink-0">
-            <button
-              type="button"
-              @click="cerrarModal"
-              class="w-full sm:w-auto rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800 dark:text-gray-200"
-            >
-              Cancelar
-            </button>
-
-            <button
-              type="submit"
-              form="ubicacionForm"
-              :disabled="saving"
-              class="w-full sm:w-auto rounded-xl bg-brand-500 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-brand-600 disabled:opacity-50"
-            >
-              {{ saving ? 'Guardando...' : 'Guardar' }}
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   </AdminLayout>
 </template>
-
 <script setup>
 import Swal from 'sweetalert2'
 import { Pencil, Ban } from 'lucide-vue-next'
-import { ref, onMounted, nextTick, h } from 'vue'
-import { useSidebar } from '@/composables/useSidebar'
-import { getUbicaciones, createUbicacion, updateUbicacion, deleteUbicacion } from '@/api/endpoints'
+import { ref, onMounted, h } from 'vue'
+import { getUbicaciones, deleteUbicacion } from '@/api/endpoints'
+
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
-import MapaPoligono from '@/components/common/MapaPoligono.vue'
-
-const { isExpanded, isHovered } = useSidebar()
+import ModalUbicacion from '@/components/common/ModalUbicacion.vue'
 
 const items = ref([])
 const estado = ref('activo')
 const showModal = ref(false)
-const editandoId = ref(null)
-const saving = ref(false)
-const errorMsg = ref('')
-const coordenadas = ref([])
-
-const form = ref({
-  nombre_lugar: '',
-  tipo: 'aula',
-  edificio_campus: '',
-  tolerancia_metros: 50,
-})
+const editandoItem = ref(null)
 
 const IconAula = () =>
   h('svg', { fill: 'none', stroke: 'currentColor', viewBox: '0 0 24 24' }, [
@@ -383,90 +261,20 @@ const getTipoEstilo = (tipo) => {
 
 const cargar = async () => {
   try {
-    const { data } = await getUbicaciones({
-      estado: estado.value,
-    })
+    const { data } = await getUbicaciones({ estado: estado.value })
     items.value = data.data.data
   } catch (e) {
     console.error('Error cargando ubicaciones:', e)
   }
 }
 
-const cerrarModal = () => {
-  showModal.value = false
-  editandoId.value = null
-  coordenadas.value = []
-}
-
-const abrirModal = async (item = null) => {
-  errorMsg.value = ''
-
-  showModal.value = false
-  await nextTick()
-
-  if (item) {
-    editandoId.value = item.id
-    form.value = {
-      nombre_lugar: item.nombre_lugar || '',
-      tipo: item.tipo || 'aula',
-      edificio_campus: item.edificio_campus || '',
-      tolerancia_metros: item.tolerancia_metros || 50,
-    }
-
-    try {
-      if (Array.isArray(item.coordenadas)) {
-        coordenadas.value = JSON.parse(JSON.stringify(item.coordenadas))
-      } else if (typeof item.coordenadas === 'string') {
-        coordenadas.value = JSON.parse(item.coordenadas)
-      } else {
-        coordenadas.value = []
-      }
-    } catch (err) {
-      console.warn('Error parseando coordenadas:', err)
-      coordenadas.value = []
-    }
-  } else {
-    editandoId.value = null
-    form.value = {
-      nombre_lugar: '',
-      tipo: 'aula',
-      edificio_campus: '',
-      tolerancia_metros: 50,
-    }
-    coordenadas.value = []
-  }
-
+const abrirModal = (item = null) => {
+  editandoItem.value = item
   showModal.value = true
 }
 
-const guardar = async () => {
-  saving.value = true
-  errorMsg.value = ''
-
-  try {
-    if (coordenadas.value.length < 3) {
-      errorMsg.value = 'El polígono debe tener al menos 3 puntos'
-      return
-    }
-
-    const payload = {
-      ...form.value,
-      coordenadas: coordenadas.value,
-    }
-
-    if (editandoId.value) {
-      await updateUbicacion(editandoId.value, payload)
-    } else {
-      await createUbicacion(payload)
-    }
-    cerrarModal()
-    await cargar()
-  } catch (e) {
-    console.error('Error guardando ubicación:', e)
-    errorMsg.value = e.response?.data?.message || 'Error al guardar la ubicación'
-  } finally {
-    saving.value = false
-  }
+const onUbicacionGuardada = async () => {
+  await cargar()
 }
 
 const eliminar = async (id) => {
@@ -482,22 +290,14 @@ const eliminar = async (id) => {
     focusCancel: true,
     background: isDark ? '#0f172a' : '#ffffff',
     color: isDark ? '#f8fafc' : '#1e293b',
-
-    showClass: {
-      popup: 'animate__animated animate__fadeInUp animate__faster',
-    },
-    hideClass: {
-      popup: 'animate__animated animate__fadeOutDown animate__faster',
-    },
+    showClass: { popup: 'animate__animated animate__fadeInUp animate__faster' },
+    hideClass: { popup: 'animate__animated animate__fadeOutDown animate__faster' },
     customClass: {
-      popup:
-        'font-sans rounded-[3rem] border border-rose-500/20 dark:border-slate-700/60 p-8 shadow-2xl shadow-rose-500/5 backdrop-blur-xl',
+      popup: 'font-sans rounded-[3rem] border border-rose-500/20 dark:border-slate-700/60 p-8 shadow-2xl shadow-rose-500/5 backdrop-blur-xl',
       title: 'text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100',
       htmlContainer: 'text-sm font-medium text-slate-500 dark:text-slate-400 mt-2',
-      confirmButton:
-        'px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 active:scale-95 text-white font-bold text-sm transition-all duration-200 shadow-lg shadow-rose-500/25 focus:ring-4 focus:ring-rose-500/20 focus:outline-none ml-3 tracking-wide',
-      cancelButton:
-        'px-6 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 active:scale-95 text-slate-600 font-bold text-sm transition-all duration-200 border border-slate-200/60 dark:border-slate-700/60 focus:outline-none tracking-wide',
+      confirmButton: 'px-6 py-3 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 active:scale-95 text-white font-bold text-sm transition-all duration-200 shadow-lg shadow-rose-500/25 ml-3 tracking-wide',
+      cancelButton: 'px-6 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 active:scale-95 text-slate-600 font-bold text-sm transition-all duration-200 tracking-wide',
       icon: 'border-0 scale-90 -mb-1',
     },
     buttonsStyling: false,
@@ -507,7 +307,6 @@ const eliminar = async (id) => {
     try {
       await deleteUbicacion(id)
       await cargar()
-
       Swal.fire({
         title: '¡Eliminado!',
         text: 'La asignación ha sido desactivada con éxito.',
@@ -517,16 +316,9 @@ const eliminar = async (id) => {
         showConfirmButton: false,
         background: isDark ? '#0f172a' : '#ffffff',
         color: isDark ? '#f8fafc' : '#1e293b',
-        showClass: {
-          popup: 'animate__animated animate__fadeInUp animate__faster',
-        },
-        hideClass: {
-          popup: 'animate__animated animate__fadeOutDown animate__faster',
-        },
         customClass: {
-          popup:
-            'font-sans rounded-[2.5rem] border border-emerald-500/20 dark:border-slate-700/60 p-6 shadow-2xl shadow-emerald-500/5',
-          title: 'text-xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight',
+          popup: 'font-sans rounded-[2.5rem] border border-emerald-500/20 dark:border-slate-700/60 p-6 shadow-2xl',
+          title: 'text-xl font-extrabold text-slate-900 dark:text-slate-100',
           htmlContainer: 'text-sm font-medium text-slate-500 dark:text-slate-400 mt-1',
         },
       })
@@ -536,7 +328,5 @@ const eliminar = async (id) => {
   }
 }
 
-onMounted(() => {
-  cargar()
-})
+onMounted(cargar)
 </script>
