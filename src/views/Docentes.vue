@@ -130,8 +130,37 @@
             </div>
             <div>
               <label class="block text-sm font-medium mb-1">Departamento</label>
-              <input v-model="form.departamento" type="text" required class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:bg-gray-800 dark:border-gray-700" />
+              <input
+                v-model="form.departamento"
+                type="text"
+                required
+                placeholder="Varias carreras"
+                class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:bg-gray-800 dark:border-gray-700"
+              />
             </div>
+
+            <div v-if="!esSupervisor">
+              <label class="block text-sm font-medium mb-1">
+                Carreras (mínimo 1)
+              </label>
+              <div class="space-y-1 max-h-40 overflow-y-auto border border-gray-300 rounded-lg p-2 dark:border-gray-700">
+                <label
+                  v-for="c in carreras"
+                  :key="c.id"
+                  class="flex items-center gap-2 cursor-pointer text-sm p-1 hover:bg-gray-50 dark:hover:bg-gray-800 rounded"
+                >
+                  <input
+                    type="checkbox"
+                    :value="c.id"
+                    v-model="carrerasSeleccionadas"
+                    class="rounded border-gray-300"
+                  />
+                  {{ c.nombre }}
+                </label>
+              </div>
+            </div>
+
+
             <div v-if="!editando">
               <label class="block text-sm font-medium mb-1">Contraseña</label>
               <input v-model="form.password" type="password" required class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:bg-gray-800 dark:border-gray-700" />
@@ -421,6 +450,20 @@ const saving = ref(false)
 const errorMsg = ref('')
 const showCrearUbicacion = ref(false)
 const filaParaUbicacion = ref(null)
+const carreras = ref([])
+const carrerasSeleccionadas = ref([])
+
+const cargarCarreras = async () => {
+  if (esSupervisor) return
+  try {
+    const { data } = await getCarreras({ estado: 'activo' })
+    carreras.value = data.data.data
+  } catch (e) {
+    console.error('Error cargando carreras', e)
+  }
+}
+
+
 
 const form = ref({
   nombre_completo: '',
@@ -453,26 +496,41 @@ const abrirModal = (docente = null) => {
       departamento: docente.departamento || '',
       password: ''
     }
+    carrerasSeleccionadas.value = docente.carreras?.map(c => c.id) || []
   } else {
     editando.value = null
-    form.value = { nombre_completo: '', email: '', ci: '', departamento: '', password: '' }
+    form.value = { nombre_completo: '', email: '', ci: '', departamento: 'Varias carreras', password: '' }
+    carrerasSeleccionadas.value = []
   }
   showModal.value = true
 }
 
+
 const guardar = async () => {
   saving.value = true
   errorMsg.value = ''
+
+  // Validar al menos 1 carrera (solo admin)
+  if (!esSupervisor && carrerasSeleccionadas.value.length === 0) {
+    errorMsg.value = 'Debes seleccionar al menos una carrera.'
+    saving.value = false
+    return
+  }
+
   try {
     if (editando.value) {
       await updateDocente(editando.value.id, {
         nombre_completo: form.value.nombre_completo,
         email: form.value.email,
         ci: form.value.ci,
-        departamento: form.value.departamento
+        departamento: form.value.departamento,
+        carreras: carrerasSeleccionadas.value,
       })
     } else {
-      await createDocente(form.value)
+      await createDocente({
+        ...form.value,
+        carreras: carrerasSeleccionadas.value,
+      })
     }
     showModal.value = false
     cargarDocentes()
@@ -552,7 +610,7 @@ const previsualizando = ref(false)
 const confirmando = ref(false)
 const importError = ref('')
 const preview = ref(null)
-const carreras = ref([])
+
 const ubicaciones = ref([])
 
 const importForm = ref({
@@ -723,5 +781,8 @@ const confirmarImportar = async () => {
   }
 }
 
-onMounted(cargarDocentes)
+onMounted(() => {
+  cargarDocentes()
+  cargarCarreras()
+})
 </script>
