@@ -319,12 +319,12 @@ const menuCompleto = [
           path: "/reset-dispositivo",
           roles: ['admin'],
         },
-      // {
-      //   icon: UserCircleIcon,
-      //   name: "Usuarios",
-      //   path: "/usuarios",
-      //   roles: ['admin'],
-      // },
+        {
+          icon: UserCircleIcon,
+          name: "Usuarios",
+          path: "/usuarios",
+          roles: ['admin'],
+        },
     ],
   },
 ]

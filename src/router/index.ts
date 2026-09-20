@@ -72,6 +72,12 @@ const router = createRouter({
       component: () => import('../views/MarcadosAdmin.vue'),
       meta: { title: 'Validar Marcados', requiresAuth: true, roles: ['admin', 'supervisor'] },
     },
+    {
+      path: '/usuarios',
+      name: 'Usuarios',
+      component: () => import('../views/Usuarios.vue'),
+      meta: { title: 'Usuarios', requiresAuth: true, roles: ['admin'] },
+    },
   ],
 })
 

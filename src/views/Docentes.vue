@@ -31,6 +31,7 @@
             Importar Docente
           </button>
           <button
+            v-if="!esSupervisor"
             @click="abrirModal()"
             class="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
           >
@@ -79,6 +80,7 @@
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-2">
                     <button
+                      v-if="!esSupervisor"
                       @click="abrirModal(docente)"
                       class="p-2 text-blue-600 border-b-2 border-transparent hover:border-blue-600 dark:hover:border-blue-400 rounded-lg transition flex items-center gap-1.5"
                     >
@@ -161,7 +163,7 @@
 
           <!-- PASO 1: Formulario -->
           <div v-if="pasoImportar === 1" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div :class="['grid grid-cols-1 gap-4', esSupervisor ? 'sm:grid-cols-2' : 'sm:grid-cols-3']">
               <div>
                 <label class="block text-sm font-medium mb-1">CI del Docente</label>
                 <input
@@ -172,7 +174,8 @@
                   class="h-11 w-full rounded-lg border border-gray-300 px-3 text-sm dark:bg-gray-800 dark:border-gray-700"
                 />
               </div>
-              <div>
+
+              <div v-if="!esSupervisor">
                 <label class="block text-sm font-medium mb-1">Carrera</label>
                 <select
                   v-model="importForm.carrera_id_externo"
@@ -184,6 +187,8 @@
                   </option>
                 </select>
               </div>
+
+
               <div>
                 <label class="block text-sm font-medium mb-1">Gestión</label>
                 <input
@@ -203,7 +208,7 @@
               </button>
               <button
                 @click="previsualizar"
-                :disabled="previsualizando || !importForm.ci || !importForm.carrera_id_externo"
+                :disabled="previsualizando || !importForm.ci || (!esSupervisor && !importForm.carrera_id_externo)"
                 class="flex items-center gap-2 px-5 py-2.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
               >
                 <Search :size="18" />
@@ -402,6 +407,10 @@ import ModalUbicacion from '@/components/common/ModalUbicacion.vue'
 /* ============================================================
    CRUD DOCENTES
    ============================================================ */
+const userRaw = localStorage.getItem('user')
+const user = userRaw ? JSON.parse(userRaw) : null
+const esSupervisor = user?.rol === 'supervisor'
+const carreraSupervisor = user?.carrera_id || null
 const docentes = ref([])
 const buscar = ref('')
 const estado = ref('activo')
@@ -559,16 +568,29 @@ const abrirModalImportar = async () => {
   confirmando.value = false
   importError.value = ''
   preview.value = null
-  importForm.value = { ci: '', carrera_id_externo: null, gestion: null }
 
-  try {
-    const { data } = await getCarreras({ estado: 'activo' })
-    carreras.value = data.data.data
-  } catch (e) {
-    console.error('Error cargando carreras', e)
+  // Prellenar con la carrera del supervisor (si aplica)
+  importForm.value = {
+    ci: '',
+    carrera_id_externo: null,
+    gestion: null,
+  }
+
+  if (esSupervisor) {
+    // No llamar a /carreras (403). El supervisor usa su carrera fija.
+    // Necesitamos el carrera_id_externo, no el interno. Hay que resolverlo.
+
+    // Opción: hacer una request al backend que devuelva la carrera del supervisor.
+    // Pero por ahora, el supervisor NO ve el selector.
+  } else {
+    try {
+      const { data } = await getCarreras({ estado: 'activo' })
+      carreras.value = data.data.data
+    } catch (e) {
+      console.error('Error cargando carreras', e)
+    }
   }
 }
-
 const cerrarImportar = () => {
   showImportar.value = false
   preview.value = null
@@ -580,7 +602,7 @@ const previsualizar = async () => {
   try {
     const { data } = await getImportarPreview({
       ci: importForm.value.ci,
-      carrera_id: importForm.value.carrera_id_externo,
+      carrera_id: importForm.value.carrera_id_externo || 0,
       gestion: importForm.value.gestion,
     })
 
@@ -640,8 +662,9 @@ const confirmarImportar = async () => {
   try {
     const payload = {
       ci: parseInt(importForm.value.ci),
-      carrera_id: importForm.value.carrera_id_externo,
+      carrera_id: importForm.value.carrera_id_externo || 0,
       gestion: importForm.value.gestion,
+
       filas: seleccionadas.value.map(f => ({
         index: f.index,
         incluir: true,

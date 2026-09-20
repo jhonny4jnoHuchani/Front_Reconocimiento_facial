@@ -74,3 +74,14 @@ export const getReconocimientoEstado = (docenteId) => api.get(`/reconocimiento/e
 // ── Importar horarios ────────────────────────────────
 export const getImportarPreview = (params) => api.get('/importar/preview', { params })
 export const confirmarImportacion = (data) => api.post('/importar/confirmar', data)
+
+// ── Usuarios (admin) ────────────────────────────────
+export const getUsuarios = (params) => api.get('/usuarios', { params })
+export const createUsuario = (data) => api.post('/usuarios', data)
+export const updateUsuario = (id, data) => api.put(`/usuarios/${id}`, data)
+export const deleteUsuario = (id) => api.delete(`/usuarios/${id}`)
+export const reactivarUsuario = (id) => api.patch(`/usuarios/${id}/reactivar`)
+export const resetPasswordUsuario = (id) => api.patch(`/usuarios/${id}/reset-password`)
+
+// ── Auth ─────────────────────────────────────────────
+export const cambiarPassword = (data) => api.post('/auth/cambiar-password', data)
