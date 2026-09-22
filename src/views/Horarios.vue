@@ -50,7 +50,7 @@
 
       <!-- Panel derecho: Horario semanal -->
       <div
-        class="flex-1 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 overflow-auto shadow-sm flex flex-col"
+        class="flex-1 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-4 sm:p-5 overflow-auto shadow-sm flex flex-col gap-4"
       >
         <div
           v-if="!ubicacionSeleccionada"
@@ -62,9 +62,12 @@
         <div v-else class="space-y-4">
           <!-- Encabezado del Panel -->
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
-              {{ ubicacionSeleccionada?.nombre_lugar }}
-            </h3>
+            <div>
+              <h3 class="text-lg font-bold text-slate-900 dark:text-slate-100">
+                {{ ubicacionSeleccionada?.nombre_lugar }}
+              </h3>
+            </div>
+            
             <button
               type="button"
               @click="abrirModal()"
@@ -74,9 +77,40 @@
             </button>
           </div>
 
+          <!-- BARRA SUPERIOR DE DOCENTES QUE OCUPAN EL LABORATORIO -->
+          <div class="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+            
+            <div class="flex flex-wrap gap-2">
+              <!-- Opción: Mostrar todos -->
+              <button
+                @click="docenteSeleccionado = null"
+                :class="[
+                  'px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border',
+                  !docenteSeleccionado
+                    ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 border-slate-900 dark:border-slate-100 shadow-sm'
+                    : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+                ]"
+              >
+                Docentes de Area
+              </button>
+              <button
+                v-for="docente in docentesEnUbicacion"
+                :key="docente.id"
+                @click="seleccionarDocente(docente)"
+                :class="[
+                  'px-3 py-1.5 rounded-xl text-xs font-semibold transition-all border flex items-center gap-1.5',
+                  docenteSeleccionado?.id === docente.id
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50'
+                ]"
+              >
+                <span>{{ docente.nombre_completo }}</span>
+              </button>
+            </div>
+          </div>
+
           <!-- VISTA MÓVIL: Pestañas de días y lista vertical de eventos -->
           <div class="block lg:hidden space-y-4">
-            <!-- Tabs horizontales con scroll -->
             <div class="flex gap-2 overflow-x-auto pb-2 border-b border-slate-200 dark:border-slate-800 scrollbar-none">
               <button
                 v-for="dia in diasSemana"
@@ -120,7 +154,7 @@
                     Grado: {{ h.paralelo_materia?.paralelo?.grado }}° "{{ h.paralelo_materia?.paralelo?.paralelo }}"
                   </div>
                   <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                    👨‍🏫 {{ h.paralelo_materia?.docente?.user?.nombre_completo || 'Sin docente asignado' }}
+                    {{ h.paralelo_materia?.docente?.user?.nombre_completo || 'Sin docente asignado' }}
                   </div>
                 </div>
 
@@ -185,6 +219,9 @@
                         {{ h.paralelo_materia?.paralelo?.grado }}°"{{
                           h.paralelo_materia?.paralelo?.paralelo
                         }}"
+                      </div>
+                      <div class="text-[10px] truncate opacity-75 font-medium">
+                         {{ h.paralelo_materia?.docente?.user?.nombre_completo || 'S/D' }}
                       </div>
                     </div>
                     <div
@@ -312,7 +349,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import Swal from 'sweetalert2'
 import { getHorarios, createHorario, updateHorario, deleteHorario, getAsignaciones, getUbicaciones } from '@/api/endpoints.js'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
@@ -322,6 +359,8 @@ const horarios = ref([])
 const asignaciones = ref([])
 const ubicaciones = ref([])
 const ubicacionSeleccionada = ref(null)
+const docenteSeleccionado = ref(null) 
+
 const diaSeleccionadoMobile = ref('lunes')
 const showModal = ref(false)
 const editando = ref(null)
@@ -332,7 +371,6 @@ const form = ref({ paralelo_materia_id: '', dia_semana: 'lunes', hora_inicio: '0
 
 const horasGrid = Array.from({ length: 14 }, (_, i) => i + 7)
 
-// Normalizar formato de hora a "HH:mm" (ej: 08:00) evitando segundos extra ("08:00:00") o faltantes
 const formatearHora = (hora) => {
   if (!hora) return '08:00'
   const partes = hora.split(':')
@@ -344,8 +382,39 @@ const formatearHora = (hora) => {
   return hora
 }
 
+
 const seleccionarUbicacion = (ubi) => {
   ubicacionSeleccionada.value = ubi
+  docenteSeleccionado.value = null 
+}
+
+const docentesEnUbicacion = computed( () => {
+  const docentesMap = new Map()
+  horarios.value.forEach(h => {
+    if (h.ubicacion_id === ubicacionSeleccionada.value.id) {
+      const docente = h.paralelo_materia?.docente
+      if (docente && docente.id && docente.user) {
+        if (!docentesMap.has(docente.id)) {
+          docentesMap.set(docente.id, {
+            id: docente.id,
+            nombre_completo: docente.user.nombre_completo
+          })
+        }
+      }
+    }
+  })
+  // console.log(docentesMap)
+  return Array.from(docentesMap.values())
+  
+})
+
+
+const seleccionarDocente = (docente) => {
+  if (docenteSeleccionado.value?.id === docente.id) {
+    docenteSeleccionado.value = null
+  } else {
+    docenteSeleccionado.value = docente
+  }
 }
 
 const onUbicacionSelectMobile = (event) => {
@@ -354,9 +423,19 @@ const onUbicacionSelectMobile = (event) => {
   if (ubi) seleccionarUbicacion(ubi)
 }
 
+// Filtrar celdas en vista escritorio
 const horariosEnCelda = (dia, hora) => {
   return horarios.value.filter((h) => {
     if (h.ubicacion_id !== ubicacionSeleccionada.value?.id) return false
+    
+    // Si hay un docente seleccionado, filtramos sólo sus horarios
+    if (docenteSeleccionado.value) {
+      if (h.paralelo_materia?.docente_id !== docenteSeleccionado.value.id && 
+          h.paralelo_materia?.docente?.id !== docenteSeleccionado.value.id) {
+        return false
+      }
+    }
+
     if (h.dia_semana !== dia) return false
     const hInicio = parseInt(h.hora_inicio?.split(':')[0])
     const hFin = parseInt(h.hora_fin?.split(':')[0])
@@ -364,16 +443,25 @@ const horariosEnCelda = (dia, hora) => {
   })
 }
 
+// Filtrar items en vista móvil
 const horariosEnDiaMobile = (dia) => {
   return horarios.value.filter((h) => {
     if (h.ubicacion_id !== ubicacionSeleccionada.value?.id) return false
+    
+    if (docenteSeleccionado.value) {
+      if (h.paralelo_materia?.docente_id !== docenteSeleccionado.value.id && 
+          h.paralelo_materia?.docente?.id !== docenteSeleccionado.value.id) {
+        return false
+      }
+    }
+
     return h.dia_semana === dia
   }).sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio))
 }
 
 const cargarHorarios = async () => {
   try {
-    const { data } = await getHorarios({estado:'activo'})
+    const { data } = await getHorarios({ estado: 'activo' })
     horarios.value = data.data.data
   } catch (e) { console.error(e) }
 }
@@ -513,10 +601,8 @@ const confirmarEliminarHorario = async () => {
   }
 }
 
-
-// const confirmarEliminarHorario =async()=>{
-//   console.log(editando.value.id)
-// }
-
-onMounted(() => { cargarCatalogos(); cargarHorarios() })
+onMounted(() => {
+  cargarCatalogos()
+  cargarHorarios()
+})
 </script>
