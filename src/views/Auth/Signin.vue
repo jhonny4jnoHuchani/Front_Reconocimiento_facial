@@ -364,10 +364,9 @@ const handleSubmit = async () => {
   error.value = ''
 
   try {
-    const response = await api.post('/auth/login', {
+    const response = await api.post('/admin/auth/login', {
       email: email.value,
       password: password.value,
-      device_id: '1',
     })
 
     localStorage.setItem('token', response.data.token)

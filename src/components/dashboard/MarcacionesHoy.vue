@@ -131,6 +131,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { API_BASE_URL } from '@/api/config'
 import { getDocentes, getHorarios, getMarcadosPendientesAdmin } from '@/api/endpoints'
 
 const marcacionesRaw = ref([])
@@ -175,7 +176,7 @@ const construirUrlFoto = (pathFoto) => {
   if (pathFoto.startsWith('http://') || pathFoto.startsWith('https://')) {
     return pathFoto
   }
-  const baseURL = 'http://186.121.212.87:1011/storage/'
+  const baseURL = API_BASE_URL.replace(/\/api\/?$/, '/storage/')
   return `${baseURL}${pathFoto.replace(/^\/+/, '')}`
 }
 
@@ -391,15 +392,22 @@ const clasesFaltantesHoy = computed(() => {
   })
 })
 
+const refrescarMarcaciones = async () => {
+  await cargarMarcacionesPendientes()
+}
+
 const cargarTodo = async () => {
-  await cargarMapaDocentes()
+  if (mapaDocentes.value.size === 0) {
+    await cargarMapaDocentes()
+  }
   await cargarDocentesConClaseHoy()
   await cargarMarcacionesPendientes()
 }
 
 onMounted(async () => {
   await cargarTodo()
-  timerPolling = setInterval(cargarTodo, 5000)
+  // Refresco ligero de marcaciones cada 30 segundos (evita saturar PostgreSQL con 36 req/min)
+  timerPolling = setInterval(refrescarMarcaciones, 30000)
 })
 
 onUnmounted(() => {

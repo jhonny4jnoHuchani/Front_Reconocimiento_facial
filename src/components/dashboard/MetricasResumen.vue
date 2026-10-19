@@ -41,14 +41,20 @@ import { getDocentes,getMaterias} from '@/api/endpoints'
 const docentes = ref(0)
 const materias = ref(0)
 async function TraerDocentes() {
-    const {data} = await getDocentes()
-    const array = data.data.data
-    docentes.value = Array.isArray(array) ? array.length : 0
+    try {
+      const { data } = await getDocentes()
+      docentes.value = data?.data?.total ?? (Array.isArray(data?.data?.data) ? data.data.data.length : (Array.isArray(data?.data) ? data.data.length : 0))
+    } catch (e) {
+      console.error('Error al traer docentes:', e)
+    }
   }
 async function TraerMaterias() {
-    const {data} = await getMaterias({estado:'activo'})
-    const array = data.data.data
-    materias.value = Array.isArray(array) ? array.length : 0
+    try {
+      const { data } = await getMaterias({ estado: 'activo' })
+      materias.value = data?.data?.total ?? (Array.isArray(data?.data?.data) ? data.data.data.length : (Array.isArray(data?.data) ? data.data.length : 0))
+    } catch (e) {
+      console.error('Error al traer materias:', e)
+    }
   }
 
 

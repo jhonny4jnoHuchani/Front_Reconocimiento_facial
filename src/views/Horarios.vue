@@ -424,6 +424,11 @@ const onUbicacionSelectMobile = (event) => {
 }
 
 // Filtrar celdas en vista escritorio
+const normalizeDay = (d) => {
+  if (!d) return ''
+  return d.toString().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim()
+}
+
 const horariosEnCelda = (dia, hora) => {
   return horarios.value.filter((h) => {
     if (h.ubicacion_id !== ubicacionSeleccionada.value?.id) return false
@@ -436,10 +441,10 @@ const horariosEnCelda = (dia, hora) => {
       }
     }
 
-    if (h.dia_semana !== dia) return false
+    if (normalizeDay(h.dia_semana) !== normalizeDay(dia)) return false
     const hInicio = parseInt(h.hora_inicio?.split(':')[0])
     const hFin = parseInt(h.hora_fin?.split(':')[0])
-    return hora >= hInicio && hora <= hFin
+    return hora >= hInicio && hora < (parseInt(h.hora_fin?.split(':')[1]) > 0 ? hFin + 1 : hFin)
   })
 }
 
@@ -455,15 +460,35 @@ const horariosEnDiaMobile = (dia) => {
       }
     }
 
-    return h.dia_semana === dia
+    return normalizeDay(h.dia_semana) === normalizeDay(dia)
   }).sort((a, b) => a.hora_inicio.localeCompare(b.hora_inicio))
 }
 
 const cargarHorarios = async () => {
   try {
-    const { data } = await getHorarios({ estado: 'activo' })
-    horarios.value = data.data.data
-  } catch (e) { console.error(e) }
+    let allHorarios = []
+    let page = 1
+    let hasMore = true
+
+    while (hasMore) {
+      const { data } = await getHorarios({ estado: 'activo', page, per_page: 100 })
+      const paginator = data.data
+      
+      if (paginator.data && Array.isArray(paginator.data)) {
+        allHorarios = allHorarios.concat(paginator.data)
+      }
+
+      if (paginator.current_page >= paginator.last_page) {
+        hasMore = false
+      } else {
+        page++
+      }
+    }
+    
+    horarios.value = allHorarios
+  } catch (e) {
+    console.error('Error cargando horarios:', e)
+  }
 }
 
 const cargarCatalogos = async () => {
@@ -480,7 +505,7 @@ const abrirModal = (item = null) => {
     editando.value = item
     form.value = { 
       paralelo_materia_id: item.paralelo_materia_id, 
-      dia_semana: item.dia_semana, 
+      dia_semana: normalizeDay(item.dia_semana), 
       hora_inicio: formatearHora(item.hora_inicio), 
       hora_fin: formatearHora(item.hora_fin), 
       tipo_actividad: item.tipo_actividad 
@@ -503,7 +528,7 @@ const abrirModalCelda = (dia, hora) => {
   editando.value = null
   form.value = {
     paralelo_materia_id: '',
-    dia_semana: dia,
+    dia_semana: normalizeDay(dia),
     hora_inicio: `${String(hora).padStart(2, '0')}:00`,
     hora_fin: `${String(hora + 1).padStart(2, '0')}:00`,
     tipo_actividad: 'clase'

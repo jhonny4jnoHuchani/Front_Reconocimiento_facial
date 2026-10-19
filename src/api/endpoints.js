@@ -1,10 +1,10 @@
-import api from './config'
+﻿import api from './config'
 
 // ── Auth ─────────────────────────────────────────────
 export const login = (email, password) =>
-  api.post('/auth/login', { email, password, device_id: 'web-admin' })
+  api.post('/admin/auth/login', { email, password })
 
-export const logout = () => api.post('/auth/logout')
+export const logout = () => api.post('/admin/auth/logout')
 
 export const perfil = () => api.get('/auth/perfil')
 
@@ -14,6 +14,7 @@ export const createDocente = (data) => api.post('/docentes', data)
 export const updateDocente = (id, data) => api.put(`/docentes/${id}`, data)
 export const deleteDocente = (id) => api.delete(`/docentes/${id}`)
 export const reactivarDocente = (id) => api.patch(`/docentes/${id}/reactivar`)
+export const resetPasswordDocente = (id) => api.patch(`/docentes/${id}/reset-password`)
 
 // ── Materias ─────────────────────────────────────────
 export const getMaterias = (params) => api.get('/materias', { params })
@@ -85,3 +86,12 @@ export const resetPasswordUsuario = (id) => api.patch(`/usuarios/${id}/reset-pas
 
 // ── Auth ─────────────────────────────────────────────
 export const cambiarPassword = (data) => api.post('/auth/cambiar-password', data)
+
+// ── Reportes y Monitoreo ─────────────────────────────────────────────
+export const getReporteMensual = (params) => api.get('/admin/reportes/mensual', { params })
+export const getMonitoreoSemanal = (params) => api.get('/admin/reportes/monitoreo-semanal', { params })
+export const getAuditoria = (params) => api.get('/admin/auditoria', { params })
+
+// ── Herramienta Marcado Manual (DEV / Administrativo) ──────────────────
+export const getDocenteHorariosPorCi = (ci) => api.get(`/admin/dev/docente-horarios/${ci}`)
+export const registrarMarcadoManual = (data) => api.post('/admin/dev/marcar-manual', data)

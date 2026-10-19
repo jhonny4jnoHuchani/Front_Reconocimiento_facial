@@ -15,7 +15,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'Dashboard',
-      component: () => import('../views/Ecommerce.vue'),
+      component: () => import('../views/Dashboard.vue'),
       meta: { title: 'Dashboard', requiresAuth: true },
     },
     {
@@ -78,18 +78,60 @@ const router = createRouter({
       component: () => import('../views/Usuarios.vue'),
       meta: { title: 'Usuarios', requiresAuth: true, roles: ['admin'] },
     },
+    {
+      path: '/reportes',
+      name: 'Reportes',
+      component: () => import('../views/Reportes.vue'),
+      meta: { title: 'Reporte Mensual', requiresAuth: true, roles: ['admin', 'supervisor'] },
+    },
+    {
+      path: '/monitoreo',
+      name: 'Monitoreo',
+      component: () => import('../views/MonitoreoSemanal.vue'),
+      meta: { title: 'Monitoreo Semanal', requiresAuth: true, roles: ['admin', 'supervisor'] },
+    },
+    {
+      path: '/auditoria',
+      name: 'Auditoria',
+      component: () => import('../views/Auditoria.vue'),
+      meta: { title: 'Auditoría del Sistema', requiresAuth: true, roles: ['admin'] },
+    },
+    {
+      path: '/marcado-manual',
+      name: 'MarcadoManual',
+      component: () => import('../views/MarcadoManual.vue'),
+      meta: { title: 'Marcado Manual DEV', requiresAuth: true, roles: ['admin', 'supervisor'] },
+    },
   ],
 })
 
-// Proteger rutas
+// Proteger rutas y autorizar roles
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token')
-  if (to.meta.requiresAuth && !token) {
-    next('/signin')
-  } else {
-    next()
+  const userRaw = localStorage.getItem('user')
+  const user = userRaw ? JSON.parse(userRaw) : null
+  const userRol = user?.rol || null
+
+  // Si ya tiene sesión activa e intenta ir a Signin, redirigir al Dashboard
+  if (to.path === '/signin' && token) {
+    return next('/')
   }
-  document.title = `${to.meta.title} | Sistema de Asistencia`
+
+  // Si requiere autenticación y no hay token
+  if (to.meta.requiresAuth && !token) {
+    return next('/signin')
+  }
+
+  // Validación de permisos por rol
+  if (to.meta.roles && Array.isArray(to.meta.roles)) {
+    if (!userRol || !to.meta.roles.includes(userRol)) {
+      // Si no tiene el rol permitido, redirigir al Dashboard principal
+      return next('/')
+    }
+  }
+
+  next()
+  document.title = `${to.meta.title || 'Panel'} | Sistema de Asistencia`
 })
 
 export default router

@@ -88,6 +88,14 @@
                       <span>Editar</span>
                     </button>
                     <button
+                      v-if="!esSupervisor"
+                      @click="resetPassword(docente)"
+                      class="p-2 text-yellow-600 border-b-2 border-transparent hover:border-yellow-600 dark:hover:border-yellow-400 rounded-lg transition flex items-center gap-1.5"
+                    >
+                      <KeyRound :size="18" />
+                      <span>Reset password</span>
+                    </button>
+                    <button
                       v-if="docente.estado === 'activo'"
                       @click="desactivar(docente.id)"
                       class="p-2 text-red-600 border-b-2 border-transparent hover:border-red-600 dark:hover:border-red-400 rounded-lg transition flex items-center gap-1.5"
@@ -422,10 +430,10 @@
 <script setup>
 import Swal from 'sweetalert2'
 import 'sweetalert2/dist/sweetalert2.min.css'
-import { Pencil, Ban, RotateCcw, UploadCloud, Search, X, CheckCircle, Plus } from 'lucide-vue-next'
+import { Pencil, Ban, RotateCcw, UploadCloud, Search, X, CheckCircle, Plus, KeyRound } from 'lucide-vue-next'
 import { ref, onMounted, computed } from 'vue'
 import {
-  getDocentes, createDocente, updateDocente, deleteDocente, reactivarDocente,
+  getDocentes, createDocente, updateDocente, deleteDocente, reactivarDocente, resetPasswordDocente,
   getCarreras, getUbicaciones, getImportarPreview, confirmarImportacion
 } from '@/api/endpoints'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
@@ -600,6 +608,77 @@ const reactivar = async (id) => {
     })
   }
 }
+
+const resetPassword = async (docente) => {
+  const isDark = document.documentElement.classList.contains('dark')
+  const nombre = docente.user?.nombre_completo || 'el docente'
+  const result = await Swal.fire({
+    title: '¿Resetear contraseña?',
+    html: `Se generará una contraseña nueva para <b>${nombre}</b>.<br/>Se cerrarán todas sus sesiones activas.`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, resetear',
+    cancelButtonText: 'Cancelar',
+    reverseButtons: true,
+    focusCancel: true,
+    background: isDark ? '#0f172a' : '#ffffff',
+    color: isDark ? '#f8fafc' : '#1e293b',
+    buttonsStyling: false,
+    customClass: {
+      popup: 'font-sans rounded-[3rem] border border-yellow-500/20 dark:border-slate-700/60 p-8 shadow-2xl',
+      title: 'text-2xl font-black tracking-tight text-slate-900 dark:text-slate-100',
+      htmlContainer: 'text-sm font-medium text-slate-500 dark:text-slate-400 mt-2',
+      confirmButton: 'px-6 py-3 rounded-2xl bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold text-sm ml-3 tracking-wide',
+      cancelButton: 'px-6 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 text-slate-600 font-bold text-sm tracking-wide',
+    },
+  })
+
+  if (result.isConfirmed) {
+    try {
+      const { data } = await resetPasswordDocente(docente.id)
+
+      await Swal.fire({
+        title: 'Contraseña generada',
+        html: `
+          <p class="mb-3">Nueva contraseña para <b>${nombre}</b>:</p>
+          <div style="background:#f3f4f6;padding:12px;border-radius:8px;font-family:monospace;font-size:1.2rem;font-weight:bold;color:#1e293b;">
+            ${data.password}
+          </div>
+          <p class="mt-3 text-xs text-gray-500">Copiala y compartila con el docente.</p>
+        `,
+        icon: 'success',
+        background: isDark ? '#0f172a' : '#ffffff',
+        color: isDark ? '#f8fafc' : '#1e293b',
+        confirmButtonText: 'Copiar',
+        showCancelButton: true,
+        cancelButtonText: 'Cerrar',
+        confirmButtonColor: '#10b981',
+      }).then((res) => {
+        if (res.isConfirmed) {
+          navigator.clipboard.writeText(data.password)
+          Swal.fire({
+            title: 'Copiada',
+            text: 'La contraseña fue copiada al portapapeles.',
+            icon: 'success',
+            timer: 1500,
+            showConfirmButton: false,
+            background: isDark ? '#0f172a' : '#ffffff',
+            color: isDark ? '#f8fafc' : '#1e293b',
+          })
+        }
+      })
+
+      cargarDocentes()
+    } catch (e) {
+      Swal.fire({
+        title: 'Error',
+        text: e.response?.data?.message || 'No se pudo resetear.',
+        icon: 'error',
+      })
+    }
+  }
+}
+
 
 /* ============================================================
    MODAL IMPORTAR DOCENTE

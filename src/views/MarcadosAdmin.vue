@@ -239,10 +239,11 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import Swal from 'sweetalert2'
 import 'sweetalert2/dist/sweetalert2.min.css'
 import { Eye, X, XCircle, CheckCircle } from 'lucide-vue-next'
+import { API_BASE_URL } from '@/api/config'
 import { getMarcadosPendientesAdmin, validarMarcadoAdmin } from '@/api/endpoints'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
@@ -292,22 +293,27 @@ const abrirModal = async (item) => {
 const cerrarModal = () => {
   showModal.value = false
   marcadoSeleccionado.value = null
+  if (imagenActual.value) {
+    URL.revokeObjectURL(imagenActual.value)
+  }
   imagenActual.value = null
 }
 
 const cargarImagen = async () => {
   if (!marcadoSeleccionado.value) return
   cargandoImagen.value = true
+  if (imagenActual.value) {
+    URL.revokeObjectURL(imagenActual.value)
+  }
   imagenActual.value = null
 
   try {
     const token = localStorage.getItem('token')
-    const baseURL = 'http://186.121.212.87:1011/api'
     const endpoint = imgTab.value === 'facial'
       ? `/admin/marcados/${marcadoSeleccionado.value.id}/imagen-facial`
       : `/admin/marcados/${marcadoSeleccionado.value.id}/imagen-constancia`
 
-    const res = await fetch(baseURL + endpoint, {
+    const res = await fetch(API_BASE_URL + endpoint, {
       headers: { Authorization: `Bearer ${token}` }
     })
 
@@ -370,4 +376,10 @@ const validar = async (decision) => {
 watch(tab, cargar)
 
 onMounted(cargar)
+
+onUnmounted(() => {
+  if (imagenActual.value) {
+    URL.revokeObjectURL(imagenActual.value)
+  }
+})
 </script>

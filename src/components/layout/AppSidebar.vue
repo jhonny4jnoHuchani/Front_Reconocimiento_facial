@@ -249,6 +249,12 @@ const menuCompleto = [
         roles: ['admin', 'supervisor'],
       },
       {
+        icon: ListIcon,
+        name: "Monitoreo Semanal",
+        path: "/monitoreo",
+        roles: ['admin', 'supervisor'],
+      },
+      {
         icon: UserCircleIcon,
         name: "Docentes",
         path: "/docentes",
@@ -302,6 +308,12 @@ const menuCompleto = [
         path: "/marcados",
         roles: ['admin', 'supervisor'],
       },
+      {
+        icon: DocsIcon,
+        name: "Reporte Mensual",
+        path: "/reportes",
+        roles: ['admin', 'supervisor'],
+      },
     ],
   },
   {
@@ -324,6 +336,18 @@ const menuCompleto = [
           name: "Usuarios",
           path: "/usuarios",
           roles: ['admin'],
+        },
+        {
+          icon: DocsIcon,
+          name: "Auditoría",
+          path: "/auditoria",
+          roles: ['admin'],
+        },
+        {
+          icon: PlugInIcon,
+          name: "Marcado Manual (DEV)",
+          path: "/marcado-manual",
+          roles: ['admin', 'supervisor'],
         },
     ],
   },
