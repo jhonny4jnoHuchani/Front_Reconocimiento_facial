@@ -95,3 +95,6 @@ export const getAuditoria = (params) => api.get('/admin/auditoria', { params })
 // ── Herramienta Marcado Manual (DEV / Administrativo) ──────────────────
 export const getDocenteHorariosPorCi = (ci) => api.get(`/admin/dev/docente-horarios/${ci}`)
 export const registrarMarcadoManual = (data) => api.post('/admin/dev/marcar-manual', data)
+
+export const editarMarcadoManual = (id, data) => api.put(`/admin/dev/marcado/${id}`, data)
+export const eliminarMarcadoManual = (id) => api.delete(`/admin/dev/marcado/${id}`)

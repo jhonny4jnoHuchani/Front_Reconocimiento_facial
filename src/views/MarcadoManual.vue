@@ -69,7 +69,18 @@
 
         <div class="flex items-center gap-4 border-t md:border-t-0 pt-3 md:pt-0">
           <div>
-            <label class="block text-xs font-medium text-gray-500 mb-1">Hora de Marcado Simulada</label>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-medium text-gray-500">Hora de Marcado Simulada</label>
+              <button
+                type="button"
+                @click="horaSimulada = obtenerHoraActual()"
+                title="Poner hora actual del sistema"
+                class="text-[11px] text-brand-600 hover:text-brand-700 flex items-center gap-0.5 ml-2 font-medium"
+              >
+                <Clock :size="12" />
+                <span>Ahora</span>
+              </button>
+            </div>
             <input
               v-model="horaSimulada"
               type="time"
@@ -112,22 +123,68 @@
               <p class="text-xs font-mono text-gray-500 dark:text-gray-400">
                 Horario: <span class="font-semibold text-gray-700 dark:text-gray-300">{{ h.hora_inicio }} - {{ h.hora_fin }}</span>
               </p>
-              <!-- Estado actual -->
-              <div class="flex items-center gap-3 pt-1 text-xs">
-                <span class="flex items-center gap-1 font-medium" :class="h.tiene_entrada ? 'text-emerald-600' : 'text-gray-400'">
-                  <CheckCircle v-if="h.tiene_entrada" :size="14" />
-                  <span v-else>○</span>
-                  Entrada: {{ h.tiene_entrada ? h.hora_entrada : 'Sin marcar' }}
-                </span>
-                <span class="flex items-center gap-1 font-medium" :class="h.tiene_salida ? 'text-blue-600' : 'text-gray-400'">
-                  <CheckCircle v-if="h.tiene_salida" :size="14" />
-                  <span v-else>○</span>
-                  Salida: {{ h.tiene_salida ? h.hora_salida : 'Sin marcar' }}
-                </span>
+              
+              <!-- Estado actual con acciones para editar / borrar -->
+              <div class="flex flex-wrap items-center gap-3 pt-1 text-xs">
+                <!-- Entrada -->
+                <div class="flex items-center gap-1.5" :class="h.tiene_entrada ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-gray-400'">
+                  <CheckCircle v-if="h.tiene_entrada" :size="15" />
+                  <span v-else class="text-sm">○</span>
+                  <span>Entrada: <b class="font-mono">{{ h.tiene_entrada ? h.hora_entrada : 'Sin marcar' }}</b></span>
+                  
+                  <!-- Botón Editar / Eliminar Entrada -->
+                  <div v-if="h.tiene_entrada" class="flex items-center gap-0.5 ml-1">
+                    <button
+                      type="button"
+                      @click="abrirModalEditarHora(h, 'entrada')"
+                      title="Editar hora de entrada"
+                      class="p-1 rounded hover:bg-emerald-100 dark:hover:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 transition-colors"
+                    >
+                      <Pencil :size="13" />
+                    </button>
+                    <button
+                      type="button"
+                      @click="confirmarEliminarMarcado(h, 'entrada')"
+                      title="Eliminar marcado de entrada"
+                      class="p-1 rounded hover:bg-red-100 dark:hover:bg-red-950/60 text-red-600 dark:text-red-400 transition-colors"
+                    >
+                      <Trash2 :size="13" />
+                    </button>
+                  </div>
+                </div>
+
+                <span class="text-gray-300 dark:text-gray-700">|</span>
+
+                <!-- Salida -->
+                <div class="flex items-center gap-1.5" :class="h.tiene_salida ? 'text-blue-600 dark:text-blue-400 font-medium' : 'text-gray-400'">
+                  <CheckCircle v-if="h.tiene_salida" :size="15" />
+                  <span v-else class="text-sm">○</span>
+                  <span>Salida: <b class="font-mono">{{ h.tiene_salida ? h.hora_salida : 'Sin marcar' }}</b></span>
+
+                  <!-- Botón Editar / Eliminar Salida -->
+                  <div v-if="h.tiene_salida" class="flex items-center gap-0.5 ml-1">
+                    <button
+                      type="button"
+                      @click="abrirModalEditarHora(h, 'salida')"
+                      title="Editar hora de salida"
+                      class="p-1 rounded hover:bg-blue-100 dark:hover:bg-blue-950/60 text-blue-700 dark:text-blue-300 transition-colors"
+                    >
+                      <Pencil :size="13" />
+                    </button>
+                    <button
+                      type="button"
+                      @click="confirmarEliminarMarcado(h, 'salida')"
+                      title="Eliminar marcado de salida"
+                      class="p-1 rounded hover:bg-red-100 dark:hover:bg-red-950/60 text-red-600 dark:text-red-400 transition-colors"
+                    >
+                      <Trash2 :size="13" />
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <!-- Botones de Acción (Libre para Entrada o Salida según solicitud) -->
+            <!-- Botones de Acción (Libre para Entrada o Salida) -->
             <div class="flex items-center gap-2">
               <button
                 @click="ejecutarMarcado(h, 'entrada')"
@@ -158,13 +215,18 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { Search, CheckCircle, LogIn, LogOut } from 'lucide-vue-next'
+import { Search, CheckCircle, LogIn, LogOut, Pencil, Trash2, Clock } from 'lucide-vue-next'
 import Swal from 'sweetalert2'
 import 'sweetalert2/dist/sweetalert2.min.css'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
 import ComponentCard from '@/components/common/ComponentCard.vue'
-import { getDocenteHorariosPorCi, registrarMarcadoManual } from '@/api/endpoints'
+import {
+  getDocenteHorariosPorCi,
+  registrarMarcadoManual,
+  editarMarcadoManual,
+  eliminarMarcadoManual,
+} from '@/api/endpoints'
 
 const ciBuscado = ref('')
 const loadingBusqueda = ref(false)
@@ -251,6 +313,149 @@ const ejecutarMarcado = async (horarioItem, tipo) => {
       title: 'Error al marcar',
       text: e.response?.data?.message || 'No se pudo registrar el marcado.',
       icon: 'error',
+    })
+  } finally {
+    procesandoMarcado.value = false
+  }
+}
+
+const abrirModalEditarHora = async (horarioItem, tipo) => {
+  const isDark = document.documentElement.classList.contains('dark')
+  const horaActual = tipo === 'entrada' ? horarioItem.hora_entrada : horarioItem.hora_salida
+  const marcadoId = tipo === 'entrada' ? horarioItem.entrada_id : horarioItem.salida_id
+  const nombreTipo = tipo === 'entrada' ? 'Entrada' : 'Salida'
+
+  const { value: nuevaHora } = await Swal.fire({
+    title: `Editar Hora de ${nombreTipo}`,
+    html: `
+      <div style="text-align: left; font-size: 14px; margin-top: 10px;">
+        <p style="margin-bottom: 6px;"><b>Docente:</b> ${docente.value.nombre_completo}</p>
+        <p style="margin-bottom: 12px;"><b>Materia:</b> ${horarioItem.materia}</p>
+        <label style="display:block; font-size: 12px; margin-bottom: 4px; font-weight: 500; color: ${isDark ? '#cbd5e1' : '#475569'};">
+          Nueva Hora (${nombreTipo}):
+        </label>
+        <input 
+          id="swal-hora-input" 
+          type="time" 
+          step="1" 
+          value="${horaActual || ''}" 
+          style="width: 100%; height: 42px; padding: 0 10px; font-size: 16px; font-family: monospace; text-align: center; border-radius: 8px; border: 1px solid ${isDark ? '#334155' : '#cbd5e1'}; background: ${isDark ? '#1e293b' : '#ffffff'}; color: ${isDark ? '#ffffff' : '#0f172a'};"
+        />
+      </div>
+    `,
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: 'Guardar Hora',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#3b82f6',
+    background: isDark ? '#0f172a' : '#ffffff',
+    color: isDark ? '#f8fafc' : '#1e293b',
+    preConfirm: () => {
+      const input = document.getElementById('swal-hora-input')
+      const val = input ? input.value : ''
+      if (!val) {
+        Swal.showValidationMessage('Por favor ingresa una hora válida (HH:mm:ss)')
+        return false
+      }
+      return val
+    },
+  })
+
+  if (!nuevaHora) return
+
+  procesandoMarcado.value = true
+  try {
+    if (marcadoId) {
+      await editarMarcadoManual(marcadoId, {
+        hora_marcado: nuevaHora,
+        fecha: fechaSimulada.value || undefined,
+      })
+    } else {
+      await registrarMarcadoManual({
+        docente_id: docente.value.id,
+        horario_id: horarioItem.horario_id,
+        tipo_marcado: tipo,
+        fecha: fechaSimulada.value || undefined,
+        hora_marcado: nuevaHora,
+        enviar_puntuales: false,
+        observacion: `Marcado manual (${tipo}) corregido desde panel DEV`,
+      })
+    }
+
+    Swal.fire({
+      icon: 'success',
+      title: '¡Hora corregida!',
+      text: `Se actualizó la hora de ${nombreTipo} a ${nuevaHora}.`,
+      timer: 2000,
+      showConfirmButton: false,
+      background: isDark ? '#0f172a' : '#ffffff',
+      color: isDark ? '#f8fafc' : '#1e293b',
+    })
+
+    await buscarDocente()
+  } catch (e) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error al actualizar',
+      text: e.response?.data?.message || 'No se pudo actualizar la hora de marcado.',
+      background: isDark ? '#0f172a' : '#ffffff',
+      color: isDark ? '#f8fafc' : '#1e293b',
+    })
+  } finally {
+    procesandoMarcado.value = false
+  }
+}
+
+const confirmarEliminarMarcado = async (horarioItem, tipo) => {
+  const isDark = document.documentElement.classList.contains('dark')
+  const marcadoId = tipo === 'entrada' ? horarioItem.entrada_id : horarioItem.salida_id
+  const nombreTipo = tipo === 'entrada' ? 'Entrada' : 'Salida'
+
+  if (!marcadoId) {
+    Swal.fire({
+      icon: 'info',
+      title: 'Sin ID de marcado',
+      text: 'Vuelve a buscar al docente para obtener la referencia del registro.',
+    })
+    return
+  }
+
+  const result = await Swal.fire({
+    title: `¿Eliminar marcado de ${nombreTipo}?`,
+    text: `El horario de ${horarioItem.materia} volverá a quedar como "Sin marcar".`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, eliminar',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#ef4444',
+    background: isDark ? '#0f172a' : '#ffffff',
+    color: isDark ? '#f8fafc' : '#1e293b',
+  })
+
+  if (!result.isConfirmed) return
+
+  procesandoMarcado.value = true
+  try {
+    await eliminarMarcadoManual(marcadoId)
+
+    Swal.fire({
+      icon: 'success',
+      title: '¡Marcado eliminado!',
+      text: `Se eliminó el marcado de ${nombreTipo}.`,
+      timer: 1800,
+      showConfirmButton: false,
+      background: isDark ? '#0f172a' : '#ffffff',
+      color: isDark ? '#f8fafc' : '#1e293b',
+    })
+
+    await buscarDocente()
+  } catch (e) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: e.response?.data?.message || 'No se pudo eliminar el marcado.',
+      background: isDark ? '#0f172a' : '#ffffff',
+      color: isDark ? '#f8fafc' : '#1e293b',
     })
   } finally {
     procesandoMarcado.value = false
