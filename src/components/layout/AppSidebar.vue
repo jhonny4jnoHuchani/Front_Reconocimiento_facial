@@ -223,142 +223,168 @@ import {
   TableIcon,
   ListIcon,
   PlugInIcon,
+  SettingsIcon,
 } from "../../icons";
 import SidebarWidget from "./SidebarWidget.vue";
 import BoxCubeIcon from "@/icons/BoxCubeIcon.vue";
 import { useSidebar } from "@/composables/useSidebar";
+import { usePermissions } from "@/composables/usePermissions";
 
 const route = useRoute();
 
 const { isExpanded, isMobileOpen, isHovered, openSubmenu } = useSidebar();
+const { hasPermission } = usePermissions();
 
 // Leer user de localStorage
 const userRaw = localStorage.getItem('user')
 const user = userRaw ? JSON.parse(userRaw) : null
 const rol = user?.rol || null
 
-// Definir todo el menú con roles permitidos por item
+// Menú institucional reorganizado por procesos de trabajo
 const menuCompleto = [
   {
-    title: "Principal",
+    title: "Asistencia y Operación",
     items: [
       {
         icon: GridIcon,
         name: "Dashboard",
         path: "/",
+        permission: "dashboard.ver",
+        roles: ['admin', 'supervisor'],
+      },
+      {
+        icon: ListIcon,
+        name: "Validar Marcados",
+        path: "/marcados",
+        permission: "asistencia.validar",
+        roles: ['admin', 'supervisor'],
+      },
+      {
+        icon: PlugInIcon,
+        name: "Marcado Administrativo",
+        path: "/marcado-manual",
+        permission: "asistencia.justificar",
         roles: ['admin', 'supervisor'],
       },
       {
         icon: ListIcon,
         name: "Monitoreo Semanal",
         path: "/monitoreo",
-        roles: ['admin', 'supervisor'],
-      },
-      {
-        icon: UserCircleIcon,
-        name: "Docentes",
-        path: "/docentes",
-        roles: ['admin', 'supervisor'],
-      },
-      {
-        icon: DocsIcon,
-        name: "Materias",
-        path: "/materias",
-        roles: ['admin', 'supervisor'],
-      },
-      {
-        icon: TableIcon,
-        name: "Paralelos",
-        path: "/paralelos",
+        permission: "asistencia.monitoreo",
         roles: ['admin', 'supervisor'],
       },
     ],
   },
   {
-    title: "Gestión",
+    title: "Planificación Académica",
     items: [
       {
-        icon: PlugInIcon,
-        name: "Asignaciones",
-        path: "/asignaciones",
-        roles: ['admin', 'supervisor'],
-      },
-      {
-        icon: PieChartIcon,
-        name: "Ubicaciones",
-        path: "/ubicaciones",
+        icon: UserCircleIcon,
+        name: "Docentes",
+        path: "/docentes",
+        permission: "docentes.ver",
         roles: ['admin', 'supervisor'],
       },
       {
         icon: CalenderIcon,
         name: "Horarios",
         path: "/horarios",
+        permission: "academica.horarios",
         roles: ['admin', 'supervisor'],
       },
-      // Rutas nuevas (descomentar cuando existan las vistas)
-      // {
-      //   icon: ListIcon,
-      //   name: "Importar Horarios",
-      //   path: "/importar",
-      //   roles: ['admin', 'supervisor'],
-      // },
       {
-        icon: ListIcon,
-        name: "Validar Marcados",
-        path: "/marcados",
+        icon: SettingsIcon,
+        name: "Ventanas de Marcado",
+        path: "/tolerancias-marcado",
+        permission: "academica.tolerancias",
+        roles: ['admin', 'supervisor'],
+      },
+      {
+        icon: PlugInIcon,
+        name: "Asignaciones",
+        path: "/asignaciones",
+        permission: "academica.asignaciones",
         roles: ['admin', 'supervisor'],
       },
       {
         icon: DocsIcon,
-        name: "Reporte Mensual",
-        path: "/reportes",
+        name: "Materias",
+        path: "/materias",
+        permission: "academica.materias",
+        roles: ['admin', 'supervisor'],
+      },
+      {
+        icon: TableIcon,
+        name: "Paralelos",
+        path: "/paralelos",
+        permission: "academica.paralelos",
+        roles: ['admin', 'supervisor'],
+      },
+      {
+        icon: PieChartIcon,
+        name: "Ubicaciones y Aulas",
+        path: "/ubicaciones",
+        permission: "academica.ubicaciones",
         roles: ['admin', 'supervisor'],
       },
     ],
   },
   {
-    title: "Administración",
+    title: "Informes",
     items: [
-        {
-          icon: TableIcon,
-          name: "Carreras",
-          path: "/carreras",
-          roles: ['admin'],
-        },
-        {
-          icon: UserCircleIcon,  // o el que prefieras
-          name: "Resetear Dispositivo",
-          path: "/reset-dispositivo",
-          roles: ['admin'],
-        },
-        {
-          icon: UserCircleIcon,
-          name: "Usuarios",
-          path: "/usuarios",
-          roles: ['admin'],
-        },
-        {
-          icon: DocsIcon,
-          name: "Auditoría",
-          path: "/auditoria",
-          roles: ['admin'],
-        },
-        {
-          icon: PlugInIcon,
-          name: "Marcado Manual (DEV)",
-          path: "/marcado-manual",
-          roles: ['admin', 'supervisor'],
-        },
+      {
+        icon: DocsIcon,
+        name: "Reporte Mensual",
+        path: "/reportes",
+        permission: "asistencia.reportes",
+        roles: ['admin', 'supervisor'],
+      },
+    ],
+  },
+  {
+    title: "Administración del Sistema",
+    items: [
+      {
+        icon: TableIcon,
+        name: "Carreras",
+        path: "/carreras",
+        permission: "sistema.carreras",
+        roles: ['admin'],
+      },
+      {
+        icon: UserCircleIcon,
+        name: "Usuarios",
+        path: "/usuarios",
+        permission: "sistema.usuarios",
+        roles: ['admin'],
+      },
+      {
+        icon: DocsIcon,
+        name: "Roles y Permisos",
+        path: "/roles-permisos",
+        permission: "sistema.roles",
+        roles: ['admin'],
+      },
+      {
+        icon: DocsIcon,
+        name: "Auditoría",
+        path: "/auditoria",
+        permission: "sistema.auditoria",
+        roles: ['admin'],
+      },
     ],
   },
 ]
 
-// Filtrar por rol
+// Filtrar por permisos dinámicos o roles
 const menuGroups = computed(() => {
   return menuCompleto
     .map(group => ({
       ...group,
       items: group.items.filter(item => {
+        if (item.permission) {
+          return hasPermission(item.permission)
+        }
         if (!item.roles) return true
         return item.roles.includes(rol)
       })

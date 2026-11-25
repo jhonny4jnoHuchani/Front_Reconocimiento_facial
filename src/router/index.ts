@@ -13,6 +13,18 @@ const router = createRouter({
       meta: { title: 'Iniciar Sesión' },
     },
     {
+      path: '/politica-de-privacidad',
+      name: 'PoliticaPrivacidad',
+      component: () => import('../views/Legal/PoliticaPrivacidad.vue'),
+      meta: { title: 'Política de Privacidad' },
+    },
+    {
+      path: '/solicitud-eliminacion-datos',
+      name: 'EliminacionDatos',
+      component: () => import('../views/Legal/EliminacionDatos.vue'),
+      meta: { title: 'Solicitud de Eliminación de Datos' },
+    },
+    {
       path: '/',
       name: 'Dashboard',
       component: () => import('../views/Dashboard.vue'),
@@ -53,6 +65,17 @@ const router = createRouter({
       name: 'Horarios',
       component: () => import('../views/Horarios.vue'),
       meta: { title: 'Horarios', requiresAuth: true },
+    },
+    {
+      path: '/tolerancias-marcado',
+      name: 'ToleranciasMarcado',
+      component: () => import('../views/ToleranciasMarcado.vue'),
+      meta: {
+        title: 'Ventanas de Marcado',
+        requiresAuth: true,
+        roles: ['admin', 'supervisor'],
+        permission: 'academica.tolerancias',
+      },
     },
     {
       path: '/carreras',
@@ -100,7 +123,13 @@ const router = createRouter({
       path: '/marcado-manual',
       name: 'MarcadoManual',
       component: () => import('../views/MarcadoManual.vue'),
-      meta: { title: 'Marcado Manual DEV', requiresAuth: true, roles: ['admin', 'supervisor'] },
+      meta: { title: 'Marcado Administrativo', requiresAuth: true, permission: 'asistencia.justificar', roles: ['admin', 'supervisor'] },
+    },
+    {
+      path: '/roles-permisos',
+      name: 'RolesPermisos',
+      component: () => import('../views/RolesPermisos.vue'),
+      meta: { title: 'Roles y Permisos', requiresAuth: true, permission: 'sistema.roles', roles: ['admin'] },
     },
   ],
 })
@@ -122,8 +151,22 @@ router.beforeEach((to, from, next) => {
     return next('/signin')
   }
 
-  // Validación de permisos por rol
-  if (to.meta.roles && Array.isArray(to.meta.roles)) {
+  // Validación de permisos dinámicos (RBAC) o roles estáticos
+  if (to.meta.permission) {
+    // Si es admin siempre pasa
+    if (userRol !== 'admin') {
+      try {
+        const rawRoles = localStorage.getItem('sistema_roles_permisos_v1')
+        const rolesList = rawRoles ? JSON.parse(rawRoles) : []
+        const rolDef = rolesList.find((r: any) => r.id === userRol)
+        if (rolDef && !rolDef.permisos.includes(to.meta.permission)) {
+          return next('/')
+        }
+      } catch (e) {
+        console.error('Error al evaluar permiso de ruta:', e)
+      }
+    }
+  } else if (to.meta.roles && Array.isArray(to.meta.roles)) {
     if (!userRol || !to.meta.roles.includes(userRol)) {
       // Si no tiene el rol permitido, redirigir al Dashboard principal
       return next('/')

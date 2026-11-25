@@ -62,7 +62,19 @@
                 <td colspan="6" class="px-4 py-4 text-center">No se encontraron docentes</td>
               </tr>
               <tr v-for="docente in docentes" :key="docente.id" class="border-t border-gray-100 dark:border-gray-800">
-                <td class="px-4 py-3">{{ docente.user?.nombre_completo }}</td>
+                <td class="px-4 py-3">
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium text-gray-800 dark:text-gray-200">{{ docente.user?.nombre_completo }}</span>
+                    <span
+                      v-if="docente.user?.device_id"
+                      class="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-semibold text-purple-700 dark:bg-purple-900/30 dark:text-purple-300 border border-purple-200/60 dark:border-purple-800/60"
+                      title="Dispositivo biométrico vinculado"
+                    >
+                      <Smartphone :size="12" />
+                      <span>APK</span>
+                    </span>
+                  </div>
+                </td>
                 <td class="px-4 py-3">{{ docente.user?.email }}</td>
                 <td class="px-4 py-3">{{ docente.user?.ci }}</td>
                 <td class="px-4 py-3">{{ docente.departamento }}</td>
@@ -80,6 +92,14 @@
                 <td class="px-4 py-3">
                   <div class="flex items-center gap-2">
                     <button
+                      @click="abrirModalSeguridad(docente)"
+                      class="p-2 text-purple-600 border-b-2 border-transparent hover:border-purple-600 dark:hover:border-purple-400 rounded-lg transition flex items-center gap-1.5"
+                      title="Seguridad, Dispositivo y Biometría"
+                    >
+                      <Smartphone :size="18" />
+                      <span>Dispositivo</span>
+                    </button>
+                    <button
                       v-if="!esSupervisor"
                       @click="abrirModal(docente)"
                       class="p-2 text-blue-600 border-b-2 border-transparent hover:border-blue-600 dark:hover:border-blue-400 rounded-lg transition flex items-center gap-1.5"
@@ -93,7 +113,7 @@
                       class="p-2 text-yellow-600 border-b-2 border-transparent hover:border-yellow-600 dark:hover:border-yellow-400 rounded-lg transition flex items-center gap-1.5"
                     >
                       <KeyRound :size="18" />
-                      <span>Reset password</span>
+                      <span>Reset pass</span>
                     </button>
                     <button
                       v-if="docente.estado === 'activo'"
@@ -408,6 +428,112 @@
           </div>
         </div>
       </div>
+      <!-- MODAL SEGURIDAD Y DISPOSITIVO BIOMÉTRICO (ABSORBE RESET DISPOSITIVO) -->
+      <div v-if="showModalSeguridad" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4">
+        <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl w-full max-w-lg p-6 dark:text-gray-200 border border-gray-200 dark:border-gray-800">
+          <div class="flex items-center justify-between pb-4 border-b border-gray-100 dark:border-gray-800 mb-5">
+            <div class="flex items-center gap-2.5">
+              <div class="rounded-xl bg-purple-100 dark:bg-purple-900/40 p-2 text-purple-600 dark:text-purple-300">
+                <Smartphone :size="20" />
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white">
+                  Dispositivo y Biometría Facial
+                </h3>
+                <p class="text-xs text-gray-400">
+                  {{ docenteSeguridad?.user?.nombre_completo }} (CI: {{ docenteSeguridad?.user?.ci }})
+                </p>
+              </div>
+            </div>
+            <button @click="showModalSeguridad = false" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+              <X :size="20" />
+            </button>
+          </div>
+
+          <div class="space-y-4">
+            <!-- Tarjeta 1: Estado del Dispositivo Móvil -->
+            <div class="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 bg-gray-50/50 dark:bg-gray-800/30">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                  <Smartphone :size="15" /> Teléfono Vinculado
+                </span>
+                <span
+                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                  :class="docenteSeguridad?.user?.device_id ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300'"
+                >
+                  {{ docenteSeguridad?.user?.device_id ? 'Vinculado a la APK' : 'Sin registrar' }}
+                </span>
+              </div>
+
+              <div v-if="docenteSeguridad?.user?.device_id" class="space-y-3 mt-3">
+                <p class="text-xs font-mono bg-white dark:bg-gray-900 p-2.5 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 truncate" :title="docenteSeguridad.user.device_id">
+                  ID: {{ docenteSeguridad.user.device_id }}
+                </p>
+                <div class="flex justify-end">
+                  <button
+                    v-if="!esSupervisor"
+                    @click="desvincularDispositivoDocente"
+                    :disabled="reseteandoDispositivo"
+                    class="flex items-center gap-2 rounded-xl bg-purple-600 hover:bg-purple-700 active:scale-95 px-4 py-2 text-xs font-bold text-white shadow-sm transition disabled:opacity-50"
+                  >
+                    <Smartphone :size="15" />
+                    <span>{{ reseteandoDispositivo ? 'Desvinculando...' : 'Desvincular / Resetear Teléfono' }}</span>
+                  </button>
+                </div>
+              </div>
+              <div v-else class="text-xs text-gray-500 dark:text-gray-400 mt-2 flex items-start gap-2">
+                <Info :size="16" class="shrink-0 text-blue-500 mt-0.5" />
+                <span>El docente puede iniciar sesión desde cualquier teléfono móvil Android para vincularlo automáticamente.</span>
+              </div>
+            </div>
+
+            <!-- Tarjeta 2: Estado Facial Biométrico -->
+            <div class="rounded-2xl border border-gray-200 dark:border-gray-800 p-4 bg-gray-50/50 dark:bg-gray-800/30">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+                  <ScanFace :size="15" /> Registro Biométrico Facial
+                </span>
+                <span
+                  class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold"
+                  :class="{
+                    'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300': estadoFacialDocente?.total_embeddings >= 50,
+                    'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300': estadoFacialDocente && estadoFacialDocente.total_embeddings < 50,
+                    'bg-gray-200 text-gray-600 dark:bg-gray-700 dark:text-gray-300': !estadoFacialDocente
+                  }"
+                >
+                  <template v-if="cargandoEstadoFacial">Consultando...</template>
+                  <template v-else-if="!estadoFacialDocente">Sin registro</template>
+                  <template v-else-if="estadoFacialDocente.total_embeddings >= 50">Completo (50/50)</template>
+                  <template v-else>Incompleto ({{ estadoFacialDocente.total_embeddings || 0 }}/50)</template>
+                </span>
+              </div>
+
+              <div class="mt-3">
+                <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
+                  <div
+                    class="h-2 rounded-full transition-all duration-500"
+                    :class="estadoFacialDocente?.total_embeddings >= 50 ? 'bg-emerald-500' : 'bg-amber-500'"
+                    :style="{ width: `${Math.min(100, ((estadoFacialDocente?.total_embeddings || 0) / 50) * 100)}%` }"
+                  ></div>
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1.5">
+                  Se requieren 50 muestras de ángulos faciales durante el enrolamiento en la aplicación móvil.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-6 flex justify-end">
+            <button
+              @click="showModalSeguridad = false"
+              class="px-5 py-2 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+
 <ModalUbicacion
   v-model="showCrearUbicacion"
   :prefill="{
@@ -422,19 +548,17 @@
   @saved="onUbicacionCreada"
 />
     </div>
-
-    
   </AdminLayout>
 </template>
 
 <script setup>
 import Swal from 'sweetalert2'
 import 'sweetalert2/dist/sweetalert2.min.css'
-import { Pencil, Ban, RotateCcw, UploadCloud, Search, X, CheckCircle, Plus, KeyRound } from 'lucide-vue-next'
+import { Pencil, Ban, RotateCcw, UploadCloud, Search, X, CheckCircle, Plus, KeyRound, Smartphone, ScanFace, Info } from 'lucide-vue-next'
 import { ref, onMounted, computed } from 'vue'
 import {
   getDocentes, createDocente, updateDocente, deleteDocente, reactivarDocente, resetPasswordDocente,
-  getCarreras, getUbicaciones, getImportarPreview, confirmarImportacion
+  getCarreras, getUbicaciones, getImportarPreview, confirmarImportacion, resetDispositivo, getReconocimientoEstado
 } from '@/api/endpoints'
 import AdminLayout from '@/components/layout/AdminLayout.vue'
 import PageBreadcrumb from '@/components/common/PageBreadcrumb.vue'
@@ -679,6 +803,76 @@ const resetPassword = async (docente) => {
   }
 }
 
+/* ============================================================
+   SEGURIDAD Y DISPOSITIVO BIOMÉTRICO
+   ============================================================ */
+const showModalSeguridad = ref(false)
+const docenteSeguridad = ref(null)
+const estadoFacialDocente = ref(null)
+const cargandoEstadoFacial = ref(false)
+const reseteandoDispositivo = ref(false)
+
+const abrirModalSeguridad = async (docente) => {
+  docenteSeguridad.value = docente
+  estadoFacialDocente.value = null
+  showModalSeguridad.value = true
+  cargandoEstadoFacial.value = true
+
+  try {
+    const { data } = await getReconocimientoEstado(docente.id)
+    estadoFacialDocente.value = data
+  } catch (e) {
+    console.error('Error al consultar estado facial:', e)
+  } finally {
+    cargandoEstadoFacial.value = false
+  }
+}
+
+const desvincularDispositivoDocente = async () => {
+  if (!docenteSeguridad.value?.user_id) return
+  const isDark = document.documentElement.classList.contains('dark')
+
+  const result = await Swal.fire({
+    title: '¿Desvincular teléfono?',
+    html: `Se desvinculará el dispositivo actual de <b>${docenteSeguridad.value.user?.nombre_completo}</b>.<br/><span class="text-xs text-gray-400">El docente podrá registrar un nuevo dispositivo móvil al volver a iniciar sesión.</span>`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, desvincular',
+    cancelButtonText: 'Cancelar',
+    confirmButtonColor: '#9333ea',
+    background: isDark ? '#0f172a' : '#ffffff',
+    color: isDark ? '#f8fafc' : '#1e293b',
+  })
+
+  if (result.isConfirmed) {
+    reseteandoDispositivo.value = true
+    try {
+      await resetDispositivo(docenteSeguridad.value.user_id)
+      if (docenteSeguridad.value.user) {
+        docenteSeguridad.value.user.device_id = null
+      }
+      await cargarDocentes()
+
+      Swal.fire({
+        title: '¡Dispositivo desvinculado!',
+        text: 'El teléfono fue desvinculado exitosamente.',
+        icon: 'success',
+        timer: 1800,
+        showConfirmButton: false,
+        background: isDark ? '#0f172a' : '#ffffff',
+        color: isDark ? '#f8fafc' : '#1e293b',
+      })
+    } catch (e) {
+      Swal.fire({
+        title: 'Error',
+        text: e.response?.data?.message || 'No se pudo desvincular el dispositivo.',
+        icon: 'error',
+      })
+    } finally {
+      reseteandoDispositivo.value = false
+    }
+  }
+}
 
 /* ============================================================
    MODAL IMPORTAR DOCENTE

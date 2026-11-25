@@ -31,13 +31,22 @@
             <option value="inactivo">Inactivos</option>
           </select>
         </div>
-        <button
-          @click="abrirModal()"
-          class="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600"
-        >
-          <UserPlus :size="18" />
-          Nuevo Usuario
-        </button>
+        <div class="flex items-center gap-2">
+          <router-link
+            to="/roles-permisos"
+            class="flex items-center gap-1.5 rounded-lg bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 dark:bg-indigo-900/30 dark:text-indigo-300 dark:border-indigo-800 px-3.5 py-2.5 text-sm font-medium transition"
+          >
+            <ShieldCheck :size="18" />
+            <span>Roles y Permisos</span>
+          </router-link>
+          <button
+            @click="abrirModal()"
+            class="flex items-center gap-2 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 transition"
+          >
+            <UserPlus :size="18" />
+            <span>Nuevo Usuario</span>
+          </button>
+        </div>
       </div>
 
       <!-- Tabla -->
@@ -228,7 +237,7 @@
 import { ref, onMounted } from 'vue'
 import Swal from 'sweetalert2'
 import 'sweetalert2/dist/sweetalert2.min.css'
-import { Pencil, Ban, RotateCcw, UserPlus, KeyRound } from 'lucide-vue-next'
+import { Pencil, Ban, RotateCcw, UserPlus, KeyRound, ShieldCheck } from 'lucide-vue-next'
 import {
   getUsuarios, createUsuario, updateUsuario,
   deleteUsuario, reactivarUsuario, resetPasswordUsuario, getCarreras

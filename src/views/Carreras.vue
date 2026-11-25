@@ -38,16 +38,17 @@
               <tr>
                 <th class="px-4 py-3">ID Externo</th>
                 <th class="px-4 py-3">Nombre</th>
+                <th class="px-4 py-3">Tolerancias de Marcado</th>
                 <th class="px-4 py-3">Estado</th>
                 <th class="px-4 py-3">Acciones</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="loading">
-                <td colspan="4" class="px-4 py-4 text-center">Cargando...</td>
+                <td colspan="5" class="px-4 py-4 text-center">Cargando...</td>
               </tr>
               <tr v-else-if="items.length === 0">
-                <td colspan="4" class="px-4 py-4 text-center">No se encontraron carreras</td>
+                <td colspan="5" class="px-4 py-4 text-center">No se encontraron carreras</td>
               </tr>
               <tr
                 v-for="item in items"
@@ -55,7 +56,18 @@
                 class="border-t border-gray-100 dark:border-gray-800"
               >
                 <td class="px-4 py-3">{{ item.carrera_id_externo }}</td>
-                <td class="px-4 py-3">{{ item.nombre }}</td>
+                <td class="px-4 py-3 font-medium">{{ item.nombre }}</td>
+                <td class="px-4 py-3">
+                  <div class="text-xs space-y-0.5">
+                    <span class="inline-flex items-center gap-1 font-mono text-slate-600 dark:text-slate-300">
+                      ⏱️ Ant: <strong>{{ item.entrada_anticipacion_min ?? 30 }}m</strong> · Tol: <strong>{{ item.entrada_tolerancia_min ?? 150 }}m</strong>
+                    </span>
+                    <br />
+                    <span class="inline-flex items-center gap-1 font-mono text-slate-500 dark:text-slate-400 text-[11px]">
+                      Sal: {{ item.salida_margen_min ?? 30 }}m · Puntual: {{ item.tolerancia_puntual_min ?? 5 }}m
+                    </span>
+                  </div>
+                </td>
                 <td class="px-4 py-3">
                   <span
                     class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs"
@@ -97,30 +109,33 @@
       </ComponentCard>
 
       <!-- Modal -->
-      <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-        <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-lg w-full max-w-md p-6 dark:text-gray-300 border">
+      <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+        <div class="bg-white dark:bg-gray-900 rounded-3xl shadow-lg w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 dark:text-gray-300 border">
           <h3 class="text-lg font-semibold mb-4">
-            {{ editando ? 'Editar Carrera' : 'Nueva Carrera' }}
+            {{ editando ? 'Editar Carrera y Ventanas de Horario' : 'Nueva Carrera' }}
           </h3>
           <form @submit.prevent="guardar" class="space-y-4">
-            <div>
-              <label class="block text-sm font-medium mb-1">ID Externo</label>
-              <input
-                v-model.number="form.carrera_id_externo"
-                type="number"
-                required
-                class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:bg-gray-800 dark:border-gray-700"
-              />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium mb-1">ID Externo</label>
+                <input
+                  v-model.number="form.carrera_id_externo"
+                  type="number"
+                  required
+                  class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:bg-gray-800 dark:border-gray-700"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Nombre de la Carrera</label>
+                <input
+                  v-model="form.nombre"
+                  type="text"
+                  required
+                  class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:bg-gray-800 dark:border-gray-700"
+                />
+              </div>
             </div>
-            <div>
-              <label class="block text-sm font-medium mb-1">Nombre</label>
-              <input
-                v-model="form.nombre"
-                type="text"
-                required
-                class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:bg-gray-800 dark:border-gray-700"
-              />
-            </div>
+
             <div v-if="editando">
               <label class="block text-sm font-medium mb-1">Estado</label>
               <select
@@ -131,8 +146,89 @@
                 <option value="inactivo">Inactivo</option>
               </select>
             </div>
+
+            <!-- Configuración de Ventanas y Tolerancias -->
+            <div class="pt-3 border-t border-gray-100 dark:border-gray-800">
+              <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+                <span>⏱️</span>
+                <span>Ventanas de Marcado y Tolerancias (Minutos)</span>
+              </h4>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-left">
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Anticipación Entrada (min)
+                  </label>
+                  <input
+                    v-model.number="form.entrada_anticipacion_min"
+                    type="number"
+                    min="0"
+                    max="240"
+                    required
+                    class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:bg-gray-800 dark:border-gray-700"
+                  />
+                  <span class="text-[11px] text-gray-400">Antes del inicio de clase (def: 30)</span>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Tolerancia Máxima Entrada (min)
+                  </label>
+                  <input
+                    v-model.number="form.entrada_tolerancia_min"
+                    type="number"
+                    min="0"
+                    max="360"
+                    required
+                    class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:bg-gray-800 dark:border-gray-700"
+                  />
+                  <span class="text-[11px] text-gray-400">Límite tras inicio (def: 150)</span>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Margen Marcado Salida (min)
+                  </label>
+                  <input
+                    v-model.number="form.salida_margen_min"
+                    type="number"
+                    min="0"
+                    max="240"
+                    required
+                    class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:bg-gray-800 dark:border-gray-700"
+                  />
+                  <span class="text-[11px] text-gray-400">Antes/después fin de clase (def: 30)</span>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Alerta Recordatoria Salida (min)
+                  </label>
+                  <input
+                    v-model.number="form.alerta_salida_min"
+                    type="number"
+                    min="0"
+                    max="60"
+                    required
+                    class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:bg-gray-800 dark:border-gray-700"
+                  />
+                  <span class="text-[11px] text-gray-400">Notificación al móvil docente (def: 5)</span>
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Tolerancia de Puntualidad (min)
+                  </label>
+                  <input
+                    v-model.number="form.tolerancia_puntual_min"
+                    type="number"
+                    min="0"
+                    max="60"
+                    required
+                    class="h-10 w-full rounded-lg border border-gray-300 px-3 text-sm dark:bg-gray-800 dark:border-gray-700"
+                  />
+                  <span class="text-[11px] text-gray-400">Minutos tras inicio considerados "Puntual" antes de marcar retraso (def: 5)</span>
+                </div>
+              </div>
+            </div>
+
             <p v-if="errorMsg" class="text-sm text-red-500">{{ errorMsg }}</p>
-            <div class="flex justify-end gap-3">
+            <div class="flex justify-end gap-3 pt-2">
               <button
                 type="button"
                 @click="showModal = false"
@@ -178,6 +274,11 @@ const form = ref({
   carrera_id_externo: null,
   nombre: '',
   estado: 'activo',
+  entrada_anticipacion_min: 30,
+  entrada_tolerancia_min: 150,
+  salida_margen_min: 30,
+  alerta_salida_min: 5,
+  tolerancia_puntual_min: 5,
 })
 
 const cargar = async () => {
@@ -200,10 +301,24 @@ const abrirModal = (item = null) => {
       carrera_id_externo: item.carrera_id_externo,
       nombre: item.nombre,
       estado: item.estado,
+      entrada_anticipacion_min: item.entrada_anticipacion_min ?? 30,
+      entrada_tolerancia_min: item.entrada_tolerancia_min ?? 150,
+      salida_margen_min: item.salida_margen_min ?? 30,
+      alerta_salida_min: item.alerta_salida_min ?? 5,
+      tolerancia_puntual_min: item.tolerancia_puntual_min ?? 5,
     }
   } else {
     editando.value = null
-    form.value = { carrera_id_externo: null, nombre: '', estado: 'activo' }
+    form.value = {
+      carrera_id_externo: null,
+      nombre: '',
+      estado: 'activo',
+      entrada_anticipacion_min: 30,
+      entrada_tolerancia_min: 150,
+      salida_margen_min: 30,
+      alerta_salida_min: 5,
+      tolerancia_puntual_min: 5,
+    }
   }
   showModal.value = true
 }
@@ -212,17 +327,21 @@ const guardar = async () => {
   saving.value = true
   errorMsg.value = ''
   try {
+    const payload = {
+      carrera_id_externo: form.value.carrera_id_externo,
+      nombre: form.value.nombre,
+      entrada_anticipacion_min: form.value.entrada_anticipacion_min,
+      entrada_tolerancia_min: form.value.entrada_tolerancia_min,
+      salida_margen_min: form.value.salida_margen_min,
+      alerta_salida_min: form.value.alerta_salida_min,
+      tolerancia_puntual_min: form.value.tolerancia_puntual_min,
+    }
+
     if (editando.value) {
-      await updateCarrera(editando.value.id, {
-        carrera_id_externo: form.value.carrera_id_externo,
-        nombre: form.value.nombre,
-        estado: form.value.estado,
-      })
+      payload.estado = form.value.estado
+      await updateCarrera(editando.value.id, payload)
     } else {
-      await createCarrera({
-        carrera_id_externo: form.value.carrera_id_externo,
-        nombre: form.value.nombre,
-      })
+      await createCarrera(payload)
     }
     showModal.value = false
     cargar()

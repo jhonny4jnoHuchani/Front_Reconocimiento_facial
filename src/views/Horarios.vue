@@ -68,13 +68,24 @@
               </h3>
             </div>
             
-            <button
-              type="button"
-              @click="abrirModal()"
-              class="w-full sm:w-auto flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all"
-            >
-              + Nuevo Horario
-            </button>
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <router-link
+                to="/tolerancias-marcado"
+                class="flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/60 px-3.5 py-2 text-xs font-semibold text-slate-700 dark:text-slate-200 shadow-sm transition-all"
+                title="Configurar ventanas de asistencia de la carrera"
+              >
+                <span>⏱️</span>
+                <span>Ventanas de Marcado</span>
+              </router-link>
+
+              <button
+                type="button"
+                @click="abrirModal()"
+                class="flex-1 sm:flex-initial flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-all"
+              >
+                + Nuevo Horario
+              </button>
+            </div>
           </div>
 
           <!-- BARRA SUPERIOR DE DOCENTES QUE OCUPAN EL LABORATORIO -->

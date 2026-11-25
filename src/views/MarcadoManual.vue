@@ -1,6 +1,6 @@
 <template>
   <AdminLayout>
-    <PageBreadcrumb pageTitle="Simulador de Marcado Manual (DEV)" />
+    <PageBreadcrumb pageTitle="Justificación y Marcado Administrativo" />
 
     <div class="space-y-6">
       <!-- Tarjeta de Búsqueda y Parámetros -->
@@ -25,7 +25,7 @@
             <button
               @click="buscarDocente"
               :disabled="loadingBusqueda || !ciBuscado.trim()"
-              class="w-full h-11 flex items-center justify-center gap-2 rounded-lg bg-brand-500 text-white font-medium text-sm hover:bg-brand-600 disabled:opacity-50"
+              class="w-full h-11 flex items-center justify-center gap-2 rounded-lg bg-brand-500 text-white font-medium text-sm hover:bg-brand-600 disabled:opacity-50 transition"
             >
               <Search :size="18" />
               <span>{{ loadingBusqueda ? 'Buscando...' : 'Buscar' }}</span>
@@ -33,14 +33,14 @@
           </div>
 
           <!-- Switch Puntuales -->
-          <div class="md:col-span-6 flex flex-col justify-end p-2 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
+          <div class="md:col-span-6 flex flex-col justify-end p-2.5 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
             <div class="flex items-center justify-between">
               <div>
                 <span class="text-sm font-bold text-gray-800 dark:text-gray-100">
-                  Sincronizar con Servicio de Puntuales
+                  Sincronización con Sistema Central
                 </span>
                 <p class="text-xs text-gray-500 dark:text-gray-400">
-                  {{ enviarPuntuales ? 'Activado: Se enviará la asistencia al sistema externo.' : 'Desactivado (DEV): Solo se guardará localmente.' }}
+                  {{ enviarPuntuales ? 'Activado: Se notificará la justificación al sistema institucional central.' : 'Desactivado: Registro asentado únicamente en base de datos local.' }}
                 </p>
               </div>
 
@@ -62,7 +62,7 @@
           </div>
           <div>
             <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ docente.nombre_completo }}</h3>
-            <p class="text-sm text-gray-500 dark:text-gray-400">CI: <span class="font-semibold text-gray-700 dark:text-gray-200">{{ docente.ci }}</span> | Finger ID: <span class="font-semibold text-emerald-600">{{ docente.finger_id || 'Sin ID' }}</span></p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">CI: <span class="font-semibold text-gray-700 dark:text-gray-200">{{ docente.ci }}</span> | ID Biométrico: <span class="font-semibold text-emerald-600">{{ docente.finger_id || 'Sin ID' }}</span></p>
             <p class="text-xs text-gray-400">Carrera: {{ docente.carrera }}</p>
           </div>
         </div>

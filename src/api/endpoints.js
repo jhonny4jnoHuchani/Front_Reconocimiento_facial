@@ -1,4 +1,4 @@
-﻿import api from './config'
+import api from './config'
 
 // ── Auth ─────────────────────────────────────────────
 export const login = (email, password) =>
@@ -65,6 +65,11 @@ export const createCarrera = (data) => api.post('/carreras', data)
 export const updateCarrera = (id, data) => api.put(`/carreras/${id}/actualizar`, data)
 export const deleteCarrera = (id) => api.delete(`/carreras/${id}/eliminar`)
 export const importarCarreras = (data) => api.post('/carreras/importar', data)
+export const getToleranciasMiCarrera = () => api.get('/carreras/mi-carrera/tolerancias')
+export const updateToleranciasMiCarrera = (data) => api.put('/carreras/mi-carrera/tolerancias', data)
+export const getToleranciasCarrera = (id) => api.get(`/carreras/${id}/tolerancias`)
+export const updateToleranciasCarrera = (id, data) => api.put(`/carreras/${id}/tolerancias`, data)
+export const updateToleranciasMasivo = (data) => api.put('/carreras/tolerancias/masivo', data)
 
 // ── Reset dispositivo (admin) ────────────────────────
 export const buscarDocentePorCi = (ci) => api.get(`/docentes/buscar-por-ci/${ci}`)
